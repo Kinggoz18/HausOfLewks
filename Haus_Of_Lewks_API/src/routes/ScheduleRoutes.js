@@ -1,0 +1,57 @@
+import { Router } from 'express';
+import { ScheduleService } from '../services/ScheduleService.js';
+import rateLimit from 'express-rate-limit';
+
+export class ScheduleRoute {
+  scheduleRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5
+  });
+
+  basePath = '/schedule';
+
+  /**
+   * Default constructor
+   * @param {ScheduleService} scheduleService
+   */
+  constructor(scheduleService) {
+    this.scheduleService = scheduleService;
+  }
+
+  /**
+   * Initialize Schedule routes
+   * @param {Router} router
+   */
+  async initRoutes(router) {
+    try {
+      router.post(
+        `${this.basePath}/create`,
+        this.scheduleRateLimit,
+        this.scheduleService.createSchedule
+      );
+      router.post(
+        `${this.basePath}/update`,
+        this.scheduleRateLimit,
+        this.scheduleService.updateSchedule
+      );
+      router.post(
+        `${this.basePath}/remove-slot`,
+        this.scheduleRateLimit,
+        this.scheduleService.removeTimeslot
+      );
+      router.post(
+        `${this.basePath}/delete`,
+        this.scheduleRateLimit,
+        this.scheduleService.deleteSchedule
+      );
+      router.get(
+        `${this.basePath}/:scheduleId`,
+        this.scheduleService.getScheduleById
+      );
+      router.get(`${this.basePath}`, this.scheduleService.getAllSchedule);
+      router.post(`${this.basePath}/date`, this.scheduleService.getByDate);
+    } catch (error) {
+      console.error(error?.message ?? error ?? 'Failed to initialize routes');
+    }
+  }
+}

@@ -1,0 +1,99 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.cache/
+.remix/
+.vite/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+
+# Credentials and secrets
+*.pem
+*.key
+credentials.json
+service-account.json
+*-credentials.json
+*-service-account.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Testing
+.jest/
+jest-results/
+
+# Misc
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+*.local
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Package manager locks (optional - uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Remix specific
+BookingWebApp/build/
+BookingWebApp/.cache/
+
+# API specific
+Haus_Of_Lewks_API/build/
+Haus_Of_Lewks_API/dist/
+
+# Uploaded files (if stored locally)
+uploads/
+public/uploads/
+
