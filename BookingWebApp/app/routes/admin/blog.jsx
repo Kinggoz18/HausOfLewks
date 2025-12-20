@@ -8,6 +8,7 @@ import {
   toggleFeedback,
 } from "../../Components/UIFeedback";
 import AddIcon from "../../images/AddIcon.svg";
+import { setupSitemapRefreshSchedule } from "../../util/sitemapRefresh";
 
 const blogAPI = new BlogAPI();
 
@@ -124,41 +125,8 @@ export default function Blog() {
   };
 
   const scheduleSitemapRefresh = () => {
-    // Store the timestamp when blog was published
-    const publishTime = Date.now();
-    const scheduledRefreshTime = publishTime + 24 * 60 * 60 * 1000; // 24 hours later
-    localStorage.setItem("lastBlogPublishTime", publishTime.toString());
-    localStorage.setItem("scheduledSitemapRefresh", scheduledRefreshTime.toString());
-    
-    // Trigger immediate sitemap fetch to notify search engines
-    // This helps with initial indexing
-    fetch("/sitemap.xml")
-      .then(() => {
-        console.log("Sitemap fetched for initial indexing");
-      })
-      .catch((err) => {
-        console.error("Error fetching sitemap:", err);
-      });
-
-    // Set up a timeout to refresh sitemap after 24 hours
-    // This is a client-side check - in production, consider a server-side cron job
-    const timeUntilRefresh = scheduledRefreshTime - Date.now();
-    if (timeUntilRefresh > 0) {
-      setTimeout(() => {
-        fetch("/sitemap.xml")
-          .then(() => {
-            console.log("Sitemap refreshed after 24 hours for re-indexing");
-            // Optionally ping search engines
-            if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-              // Ping Google Search Console (you would need to set up the API)
-              // fetch('https://www.google.com/ping?sitemap=https://hausoflewks.com/sitemap.xml');
-            }
-          })
-          .catch((err) => {
-            console.error("Error refreshing sitemap:", err);
-          });
-      }, timeUntilRefresh);
-    }
+    // Use utility function for sitemap refresh
+    setupSitemapRefreshSchedule();
   };
 
   const handleEdit = (post) => {

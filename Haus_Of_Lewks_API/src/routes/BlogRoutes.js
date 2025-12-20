@@ -1,5 +1,6 @@
 import { BlogService } from '../services/BlogService.js';
 import rateLimit from 'express-rate-limit';
+import logger from '../util/logger.js';
 
 export class BlogRoute {
   blogRateLimit = rateLimit({
@@ -30,9 +31,7 @@ export class BlogRoute {
       router.put(`${this.basePath}/:blogId`, this.blogRateLimit, this.blogService.updateBlogPost);
       router.delete(`${this.basePath}/:blogId`, this.blogRateLimit, this.blogService.deleteBlogPost);
     } catch (error) {
-      console.error(
-        error?.message ?? error ?? 'Failed to initialize blog routes'
-      );
+      logger.error('Failed to initialize blog routes', error);
     }
   }
 }

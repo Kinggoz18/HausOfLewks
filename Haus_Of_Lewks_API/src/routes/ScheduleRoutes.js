@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ScheduleService } from '../services/ScheduleService.js';
 import rateLimit from 'express-rate-limit';
+import logger from '../util/logger.js';
 
 export class ScheduleRoute {
   scheduleRateLimit = rateLimit({
@@ -51,7 +52,7 @@ export class ScheduleRoute {
       router.get(`${this.basePath}`, this.scheduleService.getAllSchedule);
       router.post(`${this.basePath}/date`, this.scheduleService.getByDate);
     } catch (error) {
-      console.error(error?.message ?? error ?? 'Failed to initialize routes');
+      logger.error('Failed to initialize schedule routes', error);
     }
   }
 }

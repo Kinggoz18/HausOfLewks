@@ -1,6 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import { MediaService } from '../services/Media.js';
 import { GoogleDriveManager } from '../services/GoogleDriveManager.js';
+import logger from '../util/logger.js';
 
 export class MediaRoute {
   bookingRateLimit = rateLimit({
@@ -55,7 +56,7 @@ export class MediaRoute {
         this.googleDriveManager.serveImageFileDrive
       );
     } catch (error) {
-      console.error(error?.message ?? error ?? 'Failed to initialize routes');
+      logger.error('Failed to initialize media routes', error);
     }
   }
 }

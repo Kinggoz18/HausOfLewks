@@ -1,5 +1,6 @@
 import { HairServices } from '../services/HairServices.js';
 import rateLimit from 'express-rate-limit';
+import logger from '../util/logger.js';
 
 export class HairServicesRoute {
   bookingRateLimit = rateLimit({
@@ -72,7 +73,7 @@ export class HairServicesRoute {
         this.hairService.getAvailableHairServicesForSchedule
       );
     } catch (error) {
-      console.error(error?.message ?? error ?? 'Failed to initialize routes');
+      logger.error('Failed to initialize hair services routes', error);
     }
   }
 }

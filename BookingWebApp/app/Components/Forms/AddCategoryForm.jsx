@@ -36,7 +36,6 @@ const AddCategoryForm = (props) => {
     fr.readAsArrayBuffer(file);
     fr.onload = function () {
       const blob = new Blob([fr.result]);
-      console.log({ blob });
       const url = URL.createObjectURL(blob);
       setImageUrl(url);
       setImage(file);
@@ -54,7 +53,6 @@ const AddCategoryForm = (props) => {
     if (title) formData.append("title", title);
 
     const response = await onAddClick(type, formData);
-    console.log({ response });
     if (response?._id) {
       setFeedbackMessage("Category Added");
       toggleFeedback(successRef);

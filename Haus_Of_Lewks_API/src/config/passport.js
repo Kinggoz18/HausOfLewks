@@ -38,9 +38,11 @@ const PassportConfig = (app) => {
         console.log('Passport google strategy');
 
         try {
-          console.log(req.query);
+          console.log('Request query:', req.query);
+          // Parse state from query (Google OAuth returns state in req.query.state)
           const state = req.query.state ? JSON.parse(req.query.state) : {};
-          const { mode } = state;
+          console.log('Parsed state in passport callback:', state);
+          const { mode, role } = state;
           const searchUser = await AdminModel.findOne({
             googleId: profile.id
           }).select('-password');
@@ -64,11 +66,19 @@ const PassportConfig = (app) => {
               throw new Error('User already exists. Please login instead.');
             }
 
+            // Get role from state (provided by frontend dropdown), default to 'Employee' if not provided
+            const selectedRole = role || 'Employee';
+            console.log('Creating user with role:', selectedRole);
+
             const user = await AdminModel.create({
               googleId: profile.id,
               googleEmail: profile.emails[0].value,
-              role: 'Employee'
+              firstName: profile.name?.givenName || '',
+              lastName: profile.name?.familyName || '',
+              role: selectedRole
             });
+            
+            console.log('User created successfully with role:', user.role);
 
             await GoogleDriveModel.deleteMany({}); // Delete previous refresh tokens
 

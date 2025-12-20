@@ -17,7 +17,6 @@ const UpdateCategoryForm = (props) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [title, setTitle] = useState("");
 
-  console.log({ serviceToUpdate });
   /**
    * Handler to set uploaded image
    * @param {*} e
@@ -38,7 +37,6 @@ const UpdateCategoryForm = (props) => {
     fr.readAsArrayBuffer(file);
     fr.onload = function () {
       const blob = new Blob([fr.result]);
-      console.log({ blob });
       const url = URL.createObjectURL(blob);
       setImageUrl(url);
       setImage(file);
@@ -60,7 +58,6 @@ const UpdateCategoryForm = (props) => {
     formData.append("id", serviceToUpdate?._id);
 
     const response = await onUpdateClick(type, formData);
-    console.log({ response });
     if (response?._id) {
       setFeedbackMessage("Category Updated");
       toggleFeedback(successRef);

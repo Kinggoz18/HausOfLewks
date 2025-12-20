@@ -5,6 +5,7 @@
 const UserRoles = Object.freeze({
   owner: 'Owner',
   employee: 'Employee',
+  developer: 'Developer',
   customer: 'Customer'
 });
 

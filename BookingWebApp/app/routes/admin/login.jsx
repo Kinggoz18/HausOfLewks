@@ -16,6 +16,7 @@ export default function Login() {
   const authService = new AuthAPI();
   const [isLogin, setIsLogin] = useState(true);
   const [signupKey, setSignupKey] = useState("");
+  const [selectedRole, setSelectedRole] = useState("Employee");
   const navigate = useNavigate();
 
   const successRef = useRef(null);
@@ -29,7 +30,7 @@ export default function Login() {
 
     try {
       if (!isLogin) {
-        await authService.authenticateUser(mode, signupKey);
+        await authService.authenticateUser(mode, signupKey, selectedRole);
       } else {
         await authService.authenticateUser(mode);
       }
@@ -87,6 +88,15 @@ export default function Login() {
               onChange={(e) => setSignupKey(e.target.value)}
               type="text"
             />
+            <select
+              className="text-neutral-900 outline-none focus:outline-none focus:ring-2 focus:ring-primary-purple py-3 px-4 sm:px-6 w-full rounded-2xl bg-neutral-100 text-sm sm:text-base"
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+            >
+              <option value="Owner">Owner</option>
+              <option value="Employee">Employee</option>
+              <option value="Developer">Developer</option>
+            </select>
             <GoogleLoginBtn
               onClick={() => onLoginClick("signup")}
               label="Google Signup"

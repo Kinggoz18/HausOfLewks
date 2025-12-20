@@ -4,6 +4,7 @@ import ScheduleModel from '../models/Schedule.js';
 import AddOnsModel from '../models/ServiceAddOns.js';
 import { ReturnObject } from '../util/returnObject.js';
 import { GoogleDriveManager } from './GoogleDriveManager.js';
+import logger from '../util/logger.js';
 
 export class HairServices {
   /**
@@ -49,7 +50,7 @@ export class HairServices {
       const response = ReturnObject(true, newService);
       return res.status(201).send(response);
     } catch (error) {
-      console.log({ error });
+      logger.error('Error in addHairService', error);
       const response = ReturnObject(
         false,
         'Something went wrong while adding new hair service'
@@ -96,7 +97,7 @@ export class HairServices {
       const response = ReturnObject(true, newCategory);
       return res.status(201).send(response);
     } catch (error) {
-      console.log({ error });
+      logger.error('Error in addHairService', error);
       const response = ReturnObject(
         false,
         'Something went wrong while adding new hair service'
@@ -137,7 +138,7 @@ export class HairServices {
       const response = ReturnObject(true, newAddon);
       return res.status(201).send(response);
     } catch (error) {
-      console.log({ error });
+      logger.error('Error in addHairService', error);
       const response = ReturnObject(
         false,
         'Something went wrong while adding new hair service'
@@ -278,7 +279,7 @@ export class HairServices {
       const response = ReturnObject(true, updatedService);
       return res.status(200).send(response);
     } catch (error) {
-      console.log({ Error: error?.message ?? error });
+      logger.error('Error in updateHairService', error);
       const response = ReturnObject(
         false,
         'Sorry, something went wrong while updating hair service'
@@ -297,7 +298,7 @@ export class HairServices {
     const { id, title } = req.body;
 
     try {
-      console.log({ id });
+      logger.debug('Updating category', { id });
       if (!id) {
         const response = ReturnObject(false, 'Invalid request arguemnt');
         return res.status(404).send(response);
@@ -356,7 +357,7 @@ export class HairServices {
       const response = ReturnObject(true, updatedService);
       return res.status(200).send(response);
     } catch (error) {
-      console.error({ Error: error?.message ?? error });
+      logger.error('Error in removeHairService', error);
       const response = ReturnObject(
         false,
         'Sorry, something went wrong while updating hair service'
@@ -400,10 +401,10 @@ export class HairServices {
       const response = ReturnObject(true, updatedService);
       return res.status(200).send(response);
     } catch (error) {
-      console.log({ Error: error?.message ?? error });
+      logger.error('Error in updateAddon', error);
       const response = ReturnObject(
         false,
-        'Sorry, something went wrong while updating hair service'
+        'Sorry, something went wrong while updating addon'
       );
       return res.status(400).send(response);
     }
@@ -504,7 +505,7 @@ export class HairServices {
 
       //Return only the ones that can be completed in the time frame
       allHairServices?.forEach((service) => {
-        console.log({ ServiceDuration: service?.duration });
+        logger.debug('Getting available services for schedule', { serviceDuration: service?.duration });
         if (service.duration <= longestConsecutive) {
           if (!availableServices[service.category]) {
             availableServices[service.category] = [];
@@ -514,16 +515,16 @@ export class HairServices {
         }
       });
 
-      console.log({
+      logger.debug('Available services calculation', {
         startTime,
         longestConsecutive,
-        availableSlots
+        availableSlotsCount: availableSlots?.length || 0
       });
 
       const response = ReturnObject(true, availableServices);
       return res.status(200).send(response);
     } catch (error) {
-      console.error(
+      logger.error(
         `getAvailableHairServicesForSchedule Error:  ${error?.message ?? error}`
       );
       const response = ReturnObject(

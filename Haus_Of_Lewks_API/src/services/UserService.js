@@ -11,6 +11,8 @@ import { serverEnvVaiables } from '../config/enviornment.js';
 import AdminModel from '../models/Admin.js';
 import { GoogleDriveManager } from './GoogleDriveManager.js';
 import GoogleDriveModel from '../models/GoogleDrive.js';
+import EmailService from './EmailService.js';
+import logger from '../util/logger.js';
 
 /**
  * @class UserService
@@ -32,8 +34,26 @@ class UserService {
    */
   googleAuthHandler = (req, res, next) => {
     try {
-      console.log('googleSignUp');
+      logger.debug('Google sign up initiated');
       const { mode } = req.query;
+      
+      // Parse state from query if provided (contains mode and role for signup)
+      let stateObj = { mode };
+      if (req.query.state) {
+        try {
+          const parsedState = JSON.parse(decodeURIComponent(req.query.state));
+          // Merge parsed state (which includes role for signup) with mode
+          // Ensure mode takes precedence if it's in both places
+          stateObj = { ...parsedState, mode };
+          logger.debug('Parsed state for OAuth', { stateObj });
+        } catch (e) {
+          logger.debug('Could not parse state parameter, using mode only');
+        }
+      }
+      
+      // Ensure state object is properly formatted for OAuth
+      const stateString = JSON.stringify(stateObj);
+      
       passport.authenticate('google', {
         scope: [
           'openid',
@@ -45,10 +65,10 @@ class UserService {
         accessType: 'offline',
         prompt: 'consent',
         includeGrantedScopes: false,
-        state: JSON.stringify({ mode })
+        state: stateString
       })(req, res, next);
     } catch (error) {
-      console.log('Error while saving user', error);
+      logger.error('Error while saving user', error);
       res.status(400).send(error);
     }
   };
@@ -62,12 +82,12 @@ class UserService {
     const appUrl = (params) =>
       `${serverEnvVaiables.cmsFrontendUrl}/admin/login?${params?.toString()}`;
 
-    console.log('Google auth handler');
+    logger.debug('Google auth handler called');
     const isDev = serverEnvVaiables?.nodeEnv === 'development';
     try {
       passport.authenticate('google', async (err, user, info) => {
         if (err) {
-          console.error('Error during Google authentication callback', err);
+          logger.error('Error during Google authentication callback', err);
           const params = new URLSearchParams({
             authError:
               'An error occurred during Google authentication. Please try again.'
@@ -86,7 +106,7 @@ class UserService {
         }
 
         const userId = user._id.toString();
-        console.log({ userId });
+        logger.debug('Getting authenticated user', { userId });
         // Fetch the most recently updated AuthCodeModel
         const mostRecentAuthCode = await AuthCodeModel.findOne({
           userId: userId
@@ -102,17 +122,13 @@ class UserService {
 
         //If the user already has a login session. Generate only new access tokens and csrf tokens
         if (mostRecentAuthCode) {
-          console.log(
-            'Already logged in. Setting refresh token and generating access and csrf token.'
-          );
+          logger.debug('Already logged in. Setting refresh token and generating access and csrf token.');
 
           refreshToken = mostRecentAuthCode?.refreshToken?.code;
           rtExpiresAt = mostRecentAuthCode?.refreshToken?.expiryDate;
           csrfToken = await getCSRFToken(mostRecentAuthCode._id.toString());
         } else {
-          console.log(
-            'Not logged in. Generating both csrf token and refresh token'
-          );
+          logger.debug('Not logged in. Generating both csrf token and refresh token');
 
           refreshToken = generateToken(userId, '7d', 'refreshToken'); //Expires in 7 days
           rtExpiresAt = new Date(Date.now() + getExpiryTime('7d')); // 7 days expiry
@@ -138,7 +154,7 @@ class UserService {
         res.cookie('csrf_token', csrfToken, cookieOptions); //Set the csrf token
         res.cookie('refreshToken', refreshToken, cookieOptions); //Set the access token to the request cookies
 
-        console.log('Auth codes created');
+        logger.debug('Auth codes created');
 
         const params = new URLSearchParams({
           userId: userId,
@@ -148,10 +164,10 @@ class UserService {
         return res.redirect(appUrl(params));
       })(req, res, next);
     } catch (error) {
-      console.log('Error during Google authentication callback', error);
+      logger.error('Error during Google authentication callback', error);
       const params = new URLSearchParams({
         authError:
-          'An error occured during Google authentication. Please try again.'
+          'An error occurred during Google authentication. Please try again.'
       });
 
       return res.redirect(appUrl(params));
@@ -172,7 +188,7 @@ class UserService {
       const tokens = await this.googleDriveManager.setTokens(code);
 
       // Save refresh_token securely in DB for future use
-      console.log('Refresh token:', tokens.refresh_token);
+      logger.debug('Refresh token received', { hasToken: !!tokens.refresh_token });
 
       await GoogleDriveModel.deleteMany({}); //Delete previous refresh tokens
       await GoogleDriveModel.create({ refreshToken: tokens.refresh_token }); //Create new refresh token
@@ -217,7 +233,7 @@ class UserService {
       }
       return customer;
     } catch (error) {
-      console.error('Error in getCustomerForBooking:', error.message ?? error);
+      logger.error('Error in getCustomerForBooking', error);
       throw new Error(error.message ?? 'Failed to get customer for booking');
     }
   };
@@ -262,7 +278,7 @@ class UserService {
   getAuthenticatedUser = async (req, res) => {
     try {
       const { userId } = req.params;
-      console.log({ userId });
+      logger.debug('Getting authenticated user', { userId });
       const customer = await AdminModel.findOne({
         _id: userId,
         role: 'Employee'
@@ -319,10 +335,37 @@ class UserService {
     try {
       const userToBlock = await UserModel.findById(userId);
       userToBlock.isBlocked = true;
-      userToBlock.save();
+      await userToBlock.save();
+
+      // Send email notification to customer when blocked
+      if (userToBlock.email && userToBlock.role === 'Customer') {
+        try {
+          const emailHtml = `
+            <h2>Account Blocked - Haus of Lewks</h2>
+            <p>Dear ${userToBlock.firstName} ${userToBlock.lastName},</p>
+            <p>Your account has been temporarily blocked due to multiple missed appointments.</p>
+            <p>To continue booking appointments, please contact us directly to resolve this matter.</p>
+            <p>We appreciate your understanding.</p>
+            <p>Best regards,<br>Haus of Lewks</p>
+          `;
+
+          await EmailService.sendEmail(
+            {
+              to: userToBlock.email,
+              subject: 'Account Blocked - Haus of Lewks',
+              html: emailHtml
+            },
+            'notification'
+          );
+        } catch (emailError) {
+          // Log email error but don't fail the block operation
+          logger.error('Error sending block notification email', emailError);
+        }
+      }
+
       return true;
     } catch (error) {
-      console.error('Error in blockUser:', error.message ?? error);
+      logger.error('Error in blockUser', error);
       throw new Error(
         error.message ?? 'Failed to block customer for missed booking'
       );
@@ -342,7 +385,7 @@ class UserService {
       const response = ReturnObject(true, 'Unblocked user');
       return res.status(200).send(response);
     } catch (error) {
-      console.error('Error in blockUser:', error.message ?? error);
+      logger.error('Error in blockUser', error);
       const response = ReturnObject(
         false,
         error.message ?? 'Failed to block customer for missed booking'
@@ -383,7 +426,7 @@ class UserService {
       return res.status(200).send(response);
     } catch (error) {
       const response = ReturnObject(false, 'Failed to log out user');
-      console.error('Error loggin user out', error);
+      logger.error('Error logging user out', error);
       return res.status(400).send(response);
     }
   };

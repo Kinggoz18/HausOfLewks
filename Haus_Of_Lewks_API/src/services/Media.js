@@ -1,6 +1,7 @@
 import { ReturnObject } from '../util/returnObject.js';
 import { GoogleDriveManager } from './GoogleDriveManager.js';
 import MediaModel from '../models/Media.js';
+import logger from '../util/logger.js';
 
 export class MediaService {
   /**
@@ -32,7 +33,7 @@ export class MediaService {
       const response = ReturnObject(true, media);
       return res.status(200).send(response);
     } catch (error) {
-      console.error('Error getting media:', error);
+      logger.error('Error getting media', error);
       const response = ReturnObject(
         false,
         'Sorry, something went wrong while trying to get media'
@@ -87,7 +88,7 @@ export class MediaService {
         );
       }
 
-      console.log({ url: driveData.publicUrl });
+      logger.debug('Media uploaded to Drive', { hasUrl: !!driveData.publicUrl });
 
       const newMedia = await MediaModel.create({
         tag: parsedTags,
@@ -99,7 +100,7 @@ export class MediaService {
       const response = ReturnObject(true, newMedia);
       return res.status(201).send(response);
     } catch (error) {
-      console.error('addMedia error:', error);
+      logger.error('Error in addMedia', error);
       const response = ReturnObject(
         false,
         error?.message ||

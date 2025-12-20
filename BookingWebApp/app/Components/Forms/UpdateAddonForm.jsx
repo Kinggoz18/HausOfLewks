@@ -14,7 +14,6 @@ const UpdateAddonForm = (props) => {
     services,
   } = props;
 
-  console.log({ serviceToUpdate });
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [service, setService] = useState(null);

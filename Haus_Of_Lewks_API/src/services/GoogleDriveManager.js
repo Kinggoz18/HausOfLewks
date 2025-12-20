@@ -4,6 +4,7 @@ import { googleEnvVariables } from '../config/enviornment.js';
 import { Readable } from 'node:stream';
 import GoogleDriveModel from '../models/GoogleDrive.js';
 import { data } from '@remix-run/node';
+import logger from '../util/logger.js';
 
 export class GoogleDriveManager {
   /**
@@ -92,7 +93,7 @@ export class GoogleDriveManager {
       });
 
       const publicUrl = `https://drive.google.com/uc?export=view&id=${file.data.id}`;
-      console.log({ publicUrl });
+      logger.debug('Drive file served', { hasPublicUrl: !!publicUrl });
 
       return {
         driveId: file.data.id,
@@ -112,7 +113,7 @@ export class GoogleDriveManager {
         await this.initOAuthWithRefreshToken();
       }
 
-      console.log({ id });
+      logger.debug('Getting Drive file info', { id });
       // Get file metadata (for MIME type)
       const { data: fileMeta } = await this.googleDrive.files.get({
         fileId: id,
@@ -135,7 +136,7 @@ export class GoogleDriveManager {
 
       driveStream.data.pipe(res);
     } catch (err) {
-      console.error('Error fetching file from Drive:', err);
+      logger.error('Error fetching file from Drive', err);
       res.status(500).json({ error: 'Failed to fetch file' });
     }
   };
@@ -172,7 +173,7 @@ export class GoogleDriveManager {
       });
 
       const publicUrl = `https://drive.google.com/uc?export=download&id=${file.data.id}`;
-      console.log({ publicUrl });
+      logger.debug('Drive file served', { hasPublicUrl: !!publicUrl });
       return {
         driveId: file.data.id,
         publicUrl
@@ -196,7 +197,7 @@ export class GoogleDriveManager {
         fileId: driveId
       });
 
-      console.log({ deleteFileFromDriveResponse: response.data });
+      logger.debug('File deleted from Drive', { success: !!response.data });
       return response.data;
     } catch (error) {
       throw new Error(

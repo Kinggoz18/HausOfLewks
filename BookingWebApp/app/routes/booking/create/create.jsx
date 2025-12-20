@@ -38,7 +38,6 @@ export const links = () => [
 const RenderAvailableSlots = (props) => {
   const { schedule, setSelected, selected } = props;
 
-  console.log({ schedule });
   return schedule?.availableSlots?.map((slot, index) => (
     <div
       key={index}
@@ -107,8 +106,6 @@ export default function CreateBooking() {
     });
     setSelectedSlot(slot);
   };
-
-  console.log({ selectedBookingService });
 
   const onNextClick = () => {
     setBookingDate(selectedDate);

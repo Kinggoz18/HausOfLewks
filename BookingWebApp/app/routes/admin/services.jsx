@@ -217,17 +217,13 @@ export default function Services() {
       setServices(allServicesFlat);
       setAddOns(addons);
 
-      console.log({
-        services: allServicesFlat,
-      });
-
       return {
         categories: categories,
         services: allServicesFlat,
         addOns: addons,
       };
     } catch (error) {
-      console.error("Failed to fetch services", error);
+      // Error is handled by the API layer and will throw with user-friendly message
       return {
         categories: [],
         services: [],

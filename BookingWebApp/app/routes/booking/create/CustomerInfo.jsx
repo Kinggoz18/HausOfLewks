@@ -196,8 +196,6 @@ export default function CustomerInfo() {
     navigate("/booking/confirm");
   };
 
-  console.log({ selectedBookingService });
-
   /********************************* {UseEffect Hooks} ***************************************/
   useValidateBookingState();
 

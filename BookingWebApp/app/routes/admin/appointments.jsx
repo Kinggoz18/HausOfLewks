@@ -13,6 +13,7 @@ import ExitIcon from "../../images/exitWhite.svg";
 import { BookingStatus } from "../../util/BookingStatus";
 import CustomButton from "../../Components/CustomButton";
 import Pagination from "../../Components/Pagination";
+import { InlineLoader, EmptyState } from "../../Components/LoadingStates";
 
 const addOnPrice = (selectedAddons) => {
   let start = 0;
@@ -440,15 +441,21 @@ export default function Appointments() {
         )}
         
         {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="w-8 h-8 border-4 border-primary-green border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex justify-center items-center py-12" role="status" aria-live="polite">
+            <InlineLoader size="lg" />
+            <span className="sr-only">Loading appointments...</span>
           </div>
         ) : !filteredBookings || filteredBookings.length === 0 ? (
-          <div className="text-center py-8 text-neutral-600">
-            {searchTerm || statusFilter || dateFilter 
-              ? "No appointments match your filters." 
-              : "No appointments found."}
-          </div>
+          <EmptyState
+            title={searchTerm || statusFilter || dateFilter 
+              ? "No appointments match your filters" 
+              : "No appointments found"}
+            description={searchTerm || statusFilter || dateFilter 
+              ? "Try adjusting your filters to see more results." 
+              : "New appointments will appear here once created."}
+            action={searchTerm || statusFilter || dateFilter ? clearFilters : undefined}
+            actionLabel={searchTerm || statusFilter || dateFilter ? "Clear Filters" : undefined}
+          />
         ) : (
           <>
             <AppointmentList

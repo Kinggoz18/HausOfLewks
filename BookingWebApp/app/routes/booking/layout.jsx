@@ -7,7 +7,6 @@ export default function BookingIndex() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log({ path });
     if (path.pathname === "/booking") {
       window.location.href = "/booking/create";
     }

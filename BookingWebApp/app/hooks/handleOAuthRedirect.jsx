@@ -36,7 +36,10 @@ const useHandleOAuthRedirect = (handleAuthErrorFunc) => {
       }
     } catch (error) {
       handleAuthErrorFunc(error?.message);
-      console.log({ error });
+      // Only log in development mode
+      if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        console.error('OAuth redirect error:', error);
+      }
     }
   };
 

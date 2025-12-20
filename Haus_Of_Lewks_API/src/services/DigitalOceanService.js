@@ -99,7 +99,7 @@ export class DigitalOceanSpacesManager {
       const deleteCommand = new DeleteObjectCommand(deleteParams);
       const resposne = await this.s3Client.send(deleteCommand);
     } catch (error) {
-      console.error({ Error: error?.message ?? error });
+      logger.error('Error in DigitalOcean service', error);
       throw new Error(
         error?.message ??
           'Something went wrong while deleting resource from digital oceans spaces'

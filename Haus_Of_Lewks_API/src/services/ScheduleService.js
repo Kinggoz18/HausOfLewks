@@ -2,6 +2,7 @@ const { Collection } = 'mongoose';
 import ScheduleModel from '../models/Schedule.js';
 import { ReturnObject } from '../util/returnObject.js';
 import { ObjectId } from 'mongodb';
+import logger from '../util/logger.js';
 
 export class ScheduleService {
   constructor() {}
@@ -21,7 +22,7 @@ export class ScheduleService {
           false,
           'Schedule date argument is incomplete'
         );
-        console.error('Error in request body: Missing a schedule argument');
+        logger.warn('Missing schedule argument in request body');
         return res.status(400).send(response);
       }
 
@@ -31,7 +32,7 @@ export class ScheduleService {
 
       if (scheduleDate < currentDate.setHours(0, 0, 0, 0)) {
         const response = ReturnObject(false, 'Invalid schedule date');
-        console.error('Error: Schedule date has already passed');
+        logger.warn('Schedule date has already passed');
         return res.status(400).send(response);
       }
 
@@ -56,7 +57,7 @@ export class ScheduleService {
         false,
         'Something went wrong while creating schedule'
       );
-      console.error({ Error: error?.message || error });
+      logger.error('Error in createSchedule', error);
       return res.status(500).send(response); // 500 for unexpected server errors
     }
   };
@@ -74,7 +75,7 @@ export class ScheduleService {
       const scheduleToUpdate = await ScheduleModel.findById(scheduleId);
       if (!scheduleToUpdate) {
         const response = ReturnObject(false, 'Schedule not found');
-        console.error({ Error: 'Failed to find the schedule to update' });
+        logger.warn('Failed to find the schedule to update');
         return res.status(404).send(response);
       }
       const currentDate = new Date();
@@ -122,7 +123,7 @@ export class ScheduleService {
       const updated = await ScheduleModel.findById(scheduleToUpdate._id);
       if (!updated) {
         const response = ReturnObject(false, 'Updated schedule not found');
-        console.error({ Error: 'Failed to find the updated schedule' });
+        logger.warn('Failed to find the updated schedule');
         return res.status(404).send(response);
       }
 
@@ -133,7 +134,7 @@ export class ScheduleService {
         false,
         'Something went wrong while updating schedule'
       );
-      console.error({ Error: error?.message || error });
+      logger.error('Error in createSchedule', error);
       return res.status(500).send(response); // 500 for unexpected server errors
     }
   };
@@ -151,7 +152,7 @@ export class ScheduleService {
       const scheduleToUpdate = await ScheduleModel.findById(scheduleId);
       if (!scheduleToUpdate) {
         const response = ReturnObject(false, 'Schedule not found');
-        console.error({ Error: 'Failed to find the schedule to update' });
+        logger.warn('Failed to find the schedule to update');
         return res.status(404).send(response);
       }
 
@@ -177,7 +178,7 @@ export class ScheduleService {
       const updated = await ScheduleModel.findById(scheduleToUpdate._id);
       if (!updated) {
         const response = ReturnObject(false, 'Updated schedule not found');
-        console.error({ Error: 'Failed to find the updated schedule' });
+        logger.warn('Failed to find the updated schedule');
         return res.status(404).send(response);
       }
 
@@ -188,7 +189,7 @@ export class ScheduleService {
         false,
         'Something went wrong while removing timeslot'
       );
-      console.error({ Error: error?.message || error });
+      logger.error('Error in createSchedule', error);
       return res.status(500).send(response); // 500 for unexpected server errors
     }
   };
@@ -304,7 +305,7 @@ export class ScheduleService {
       const response = ReturnObject(true, queriedSchedule);
       return res.status(200).send(response);
     } catch (error) {
-      console.error(error);
+      logger.error('Error in deleteSchedule', error);
       const response = ReturnObject(
         false,
         'Something went wrong while getting schedule by date'
@@ -328,7 +329,7 @@ export class ScheduleService {
     session
   ) => {
     try {
-      console.log('Booking made, updating schedule');
+      logger.debug('Booking made, updating schedule');
 
       if (!scheduleId || !booking?._id || !booking?.duration) {
         throw new Error('Missing arguments');

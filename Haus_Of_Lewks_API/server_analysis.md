@@ -1,6 +1,160 @@
 ## Haus_Of_Lewks_API – Server Analysis (Updated)
 
-### **1. Main functions of the server**
+### **1. List of Server Functions**
+
+#### **1.1 Booking Service (`src/services/BookingService.js`)**
+
+- `createBooking(req, res)` - Creates a new booking with transaction support, validates user, updates schedule availability, sends email notifications to customer and owners
+- `getBookings(req, res)` - Retrieves bookings with filtering (status, creation date range, appointment date range), pagination, and smart sorting (upcoming first, then past)
+- `getBookingSummary(req, res)` - Returns booking counts by status (completed, upcoming, cancelled, missed)
+- `getBookingById(req, res)` - Gets a single booking by ID
+- `updateBookingById(req, res)` - Updates booking status and/or total price, handles blocking users after repeated missed appointments
+- `getUserBookings(req, res)` - Finds all bookings for a customer by contact information
+- `cancelBookingByUser(req, res)` - Cancels a booking (sets status to Cancelled)
+- `getIncomeReport(req, res)` - Generates income report with total revenue, completed count, and counts by status with optional date filtering
+- `getOwnerEmails()` - Helper to retrieve owner email addresses for notifications
+- `getDbClient()` - Returns MongoDB client instance for transactions
+
+#### **1.2 Schedule Service (`src/services/ScheduleService.js`)**
+
+- `createSchedule(req, res)` - Creates a new schedule for a specific date with time slots
+- `updateSchedule(req, res)` - Updates an existing schedule's time slots
+- `removeTimeslot(req, res)` - Removes a specific time slot from a schedule
+- `deleteSchedule(req, res)` - Deletes an entire schedule
+- `getScheduleById(req, res)` - Gets schedule by ID
+- `getAllSchedule(req, res)` - Lists all schedules
+- `getByDate(req, res)` - Gets schedule for a specific date
+- `updateScheduleAfterBooking(scheduleId, startTime, duration)` - Helper to update schedule availability after booking creation
+
+#### **1.3 Hair Services (`src/services/HairServices.js`)**
+
+- `addHairService(req, res)` - Creates a new hair service
+- `updateHairService(req, res)` - Updates an existing hair service
+- `removeHairService(req, res)` - Deletes a hair service
+- `addCategory(req, res)` - Creates a new service category with cover image upload
+- `updateCategory(req, res)` - Updates a category with optional cover image
+- `removeCategory(req, res)` - Deletes a category
+- `addAddOn(req, res)` - Creates a new service add-on
+- `updateAddon(req, res)` - Updates an add-on
+- `removeAddon(req, res)` - Deletes an add-on
+- `getServicesByCategory(req, res)` - Gets all services grouped by category
+- `getCategories(req, res)` - Gets all categories
+- `getAddons(req, res)` - Gets all add-ons
+- `getAvailableHairServicesForSchedule(req, res)` - Computes which services fit in a given schedule time slot
+
+#### **1.4 User Service (`src/services/UserService.js`)**
+
+- `googleAuthHandler(req, res)` - Initiates Google OAuth authentication flow
+- `googleAuthHandlerCallback(req, res)` - Handles Google OAuth callback, creates/updates admin users
+- `getAuthenticatedUser(req, res)` - Gets authenticated user/admin by ID
+- `getAllCustomer(req, res)` - Lists all customer users
+- `getCustomerById(req, res)` - Gets a specific customer by ID
+- `getCustomerForBooking(firstName, lastName, phone, email)` - Finds or creates customer for booking
+- `blockUser(userId)` - Blocks a user (sets isBlocked flag)
+- `unBlockUser(req, res)` - Unblocks a user
+- `logout(req, res)` - Logs out a user and cleans up session
+
+#### **1.5 Media Service (`src/services/Media.js`)**
+
+- `getAllMedia(req, res)` - Gets all media with optional filtering (tag, type)
+- `addMedia(req, res)` - Uploads media file to DigitalOcean Spaces and stores metadata
+- `deleteMedia(req, res)` - Deletes media from storage and database
+
+#### **1.6 Blog Service (`src/services/BlogService.js`)**
+
+- `createBlogPost(req, res)` - Creates a new blog post with slug generation
+- `getAllBlogPosts(req, res)` - Gets all blog posts with optional published status filter
+- `getBlogPostById(req, res)` - Gets a blog post by ID
+- `getBlogPostBySlug(req, res)` - Gets a blog post by slug (for public-facing routes)
+- `updateBlogPost(req, res)` - Updates an existing blog post
+- `deleteBlogPost(req, res)` - Deletes a blog post
+
+#### **1.7 Email Service (`src/services/EmailService.js`)**
+
+- `sendEmail(emailData, template)` - Sends email using configured SMTP transport
+- Email templates for booking confirmations and notifications
+
+#### **1.8 Google Drive Manager (`src/services/GoogleDriveManager.js`)**
+
+- `serveImageFileDrive(req, res)` - Serves images from Google Drive for media library
+
+#### **1.9 Route Handlers**
+
+**Booking Routes (`src/routes/BookingRoutes.js`):**
+- `POST /booking` - Create booking
+- `POST /booking/get-bookings` - Get bookings with filters and pagination
+- `GET /booking/summary` - Get booking summary counts
+- `GET /booking/:bookingId` - Get booking by ID
+- `POST /booking/update` - Update booking
+- `POST /booking/find-user-bookings` - Find user bookings
+- `POST /booking/cancel` - Cancel booking
+- `POST /booking/income-report` - Get income report
+
+**Schedule Routes (`src/routes/ScheduleRoutes.js`):**
+- `POST /schedule/create` - Create schedule
+- `POST /schedule/update` - Update schedule
+- `POST /schedule/remove-slot` - Remove time slot
+- `POST /schedule/delete` - Delete schedule
+- `GET /schedule/:scheduleId` - Get schedule by ID
+- `GET /schedule` - Get all schedules
+- `POST /schedule/date` - Get schedule by date
+
+**Hair Services Routes (`src/routes/HairServices.js`):**
+- `POST /hair-service/service` - Add service
+- `POST /hair-service/category` - Add category
+- `POST /hair-service/add-on` - Add add-on
+- `POST /hair-service/service/:id` - Remove service
+- `POST /hair-service/category/:id` - Remove category
+- `POST /hair-service/add-on/:id` - Remove add-on
+- `POST /hair-service/update/service` - Update service
+- `POST /hair-service/update/category` - Update category
+- `POST /hair-service/update/add-on` - Update add-on
+- `GET /hair-service` - Get services by category
+- `GET /hair-service/category` - Get categories
+- `GET /hair-service/add-on` - Get add-ons
+- `POST /hair-service/available` - Get available services for schedule
+
+**User Routes (`src/routes/UserRoutes.js`):**
+- `GET /user/login` - Initiate Google OAuth
+- `GET /user/login/callback` - OAuth callback
+- `GET /user/:userId` - Get authenticated user
+- `GET /user/customer` - Get all customers
+- `GET /user/customer/:customerId` - Get customer by ID
+- `GET /user/customer/unblock/:customerId` - Unblock customer
+- `GET /user/logout/:userId` - Logout user
+
+**Media Routes (`src/routes/MediaRoutes.js`):**
+- `GET /media` - Get all media
+- `POST /media/create` - Upload media
+- `POST /media/delete` - Delete media
+- `GET /media/drive/:id` - Serve image from Google Drive
+
+**Blog Routes (`src/routes/BlogRoutes.js`):**
+- `POST /blog` - Create blog post
+- `GET /blog` - Get all blog posts
+- `GET /blog/:blogId` - Get blog post by ID
+- `GET /blog/slug/:slug` - Get blog post by slug
+- `PUT /blog/:blogId` - Update blog post
+- `DELETE /blog/:blogId` - Delete blog post
+
+#### **1.10 Middleware**
+
+- `authMiddleware.js` - Admin authentication middleware (signupAdminMiddleware)
+- `protectMiddleware.js` - Route protection middleware
+- Rate limiting middleware (applied to write-heavy endpoints)
+
+#### **1.11 Utilities**
+
+- `errorHandler.js` - Global error handler with ReturnObject format and standardized logging
+- `returnObject.js` - ReturnObject helper for consistent API responses
+- `generateCode.js` - Code generation utilities
+- `checkBookingConflict.js` - Booking conflict detection
+- `logger.js` - Centralized logging utility with log levels (ERROR, WARN, INFO, DEBUG) and consistent formatting
+- `inputValidator.js` - Input validation and sanitization utilities (XSS prevention, email/phone validation, ObjectId validation, etc.)
+- `dbConnectionPool.js` - Database connection pool manager for optimizing MongoDB transaction client reuse
+- Enums: `BookingStatus.js`, `MediaType.js`, `UserRoles.js`
+
+### **2. Main functions of the server**
 
 - **Authentication & users**
   - Google OAuth login/sign-up for admins via Passport.
@@ -247,33 +401,51 @@
   6. Manages media assets via `/media/*`.
   7. Manages blog content via `/blog/*`.
 
-### **5. Bugs & issues (server)**
+### **5. Current Bugs and Issues (Server)**
 
-- **Fixed since initial analysis**
-  - **User route path bug**: `GET /user/customer/:customerId` path corrected.
-  - **Missed-booking blocking logic**: Now properly uses `BookingModel` and compares `missedBookings.length`.
-  - **`cancelBookingByUser`**: Implemented with validation and error handling.
-  - **DB URL logging**: Replaced raw connection string logging with a neutral log message.
-  - **Appointment date filtering**: Implemented filtering by actual schedule date (not just creation date).
-  - **Pagination**: Added pagination support to `getBookings` endpoint.
-  - **Booking sorting**: Implemented smart sorting (upcoming first, then past).
-  - **Error handling standardization**: ✅ **FIXED** - `errorHandler` now uses `ReturnObject` format consistently.
-  - **Rate limiting**: ✅ **FIXED** - All write-heavy endpoints now have rate limiting applied:
-    - Booking routes: create, update, cancel
-    - Blog routes: create, update, delete
-    - Schedule routes: create, update, remove-slot, delete
-    - Hair services routes: all add/update/delete operations
-    - Media routes: create, delete
-  - **Spelling/typo fixes**: ✅ **FIXED** - Fixed "messsage" → "message" typos in error handlers across route files.
+**Critical Issues:**
+- **CORS/Routing configuration**: 
+  - Frontend requests may fail if API server is not running on port 3000.
+  - Ensure API server is running before frontend attempts API calls.
+  - CORS middleware handles OPTIONS preflight automatically (no explicit OPTIONS handlers needed).
 
-- **Current issues / technical nuances**
-  - **CORS/Routing issue**: 
-    - Frontend requests may be hitting Remix server instead of Express API server if API server is not running.
-    - Ensure API server is running on port 3000 (or update frontend config).
-    - CORS middleware automatically handles OPTIONS preflight requests (no explicit OPTIONS method needed).
-  - Mixed use of the native Mongo driver and Mongoose in the same service increases mental overhead but is functionally acceptable.
-  - **Security hardening** (intentionally not changed as per instructions):
-    - CSRF/cookie flags/middleware standardization still need a deeper review before production.
+**Non-Critical Issues / Technical Nuances:**
+- **Mixed MongoDB drivers**: Services use both native MongoDB driver (for transactions) and Mongoose (for models), which increases complexity but is functionally acceptable. Connection pooling now implemented via `dbConnectionPool.js` to optimize transaction client reuse.
+
+**Security Considerations (Intentionally Deferred):**
+- Cookie flags (`HttpOnly`, `Secure`, `SameSite`) need review before production.
+- CSRF protection not yet implemented.
+- Admin route protection could be more centralized.
+- Input sanitization could be enhanced for XSS prevention.
+
+**Fixed Issues (Not to be included in current bugs):**
+- ✅ **User route path bug**: `GET /user/customer/:customerId` path corrected.
+- ✅ **Missed-booking blocking logic**: Now properly uses `BookingModel` and compares `missedBookings.length`.
+- ✅ **`cancelBookingByUser`**: Implemented with validation and error handling.
+- ✅ **DB URL logging**: Replaced raw connection string logging with neutral log message.
+- ✅ **Appointment date filtering**: Implemented filtering by actual schedule date.
+- ✅ **Pagination**: Added pagination support to `getBookings` endpoint.
+- ✅ **Booking sorting**: Implemented smart sorting (upcoming first, then past).
+- ✅ **Error handling standardization**: `errorHandler` now uses `ReturnObject` format consistently.
+- ✅ **Rate limiting**: All write-heavy endpoints now have rate limiting applied.
+  - Write operations: 5 requests per 15 minutes
+  - Media image serving: 25 requests per 15 minutes
+  - Blog operations: 10 requests per 15 minutes
+- ✅ **Spelling/typo fixes**: Fixed "messsage" → "message" and "occured" → "occurred" typos across all files.
+- ✅ **Admin notification emails**: Email notifications to customers and owners implemented in booking creation.
+- ✅ **Logging standardization**: Created centralized `logger.js` utility with consistent formatting, log levels (ERROR, WARN, INFO, DEBUG), and contextual information. All `console.log/error` statements replaced with standardized logger calls.
+- ✅ **Database connection management**: Implemented connection pool manager (`dbConnectionPool.js`) to reuse MongoDB clients for transactions instead of creating/closing per transaction. Reuses existing mongoose connections when available.
+- ✅ **Email service error handling**: Enhanced error handling in `EmailService.js` with specific error codes (LIMIT_EXCEEDED, SMTP_LIMIT_EXCEEDED, AUTH_ERROR, CONNECTION_ERROR, SEND_ERROR) and detailed logging. Email failures are now properly logged with context but don't fail booking operations.
+- ✅ **Input validation and sanitization**: Created comprehensive `inputValidator.js` utility with functions for:
+  - String sanitization (XSS prevention, HTML tag removal, length limits)
+  - Email validation and sanitization
+  - Phone number validation and sanitization
+  - ObjectId validation and conversion
+  - Number validation with range checks
+  - Date validation
+  - Required field validation
+  - Recursive object sanitization
+- ✅ **Input validation in BookingService**: Added robust input validation and sanitization to `createBooking`, `getUserBookings`, `getBookings`, `updateBookingById`, and `cancelBookingByUser` methods.
 
 ### **6. Completed work (recent additions)**
 
@@ -289,33 +461,51 @@
   - Smart sorting: upcoming appointments first, then past appointments.
   - Booking summary endpoint for dashboard statistics.
 
-### **7. Tasks left to complete**
+### **7. Tasks Left to Complete (Server)**
 
-- **Admin notification emails**
-  - TODO remains in `createBooking` to send admin emails on new bookings using nodemailer + SMTP.
-
-- **Income reporting enhancements** ✅ **COMPLETE**
-  - Basic income reporting (total revenue + completed count + counts by status) is implemented and wired to the frontend.
-  - Date range filtering supported for income reports.
-  - Future enhancements could include:
+**Remaining Development Tasks:**
+- **Income reporting enhancements** (future improvements):
     - Category-level and service-level revenue breakdowns.
-    - Per-period comparisons (e.g., month-over-month).
-    - Integration with tax/fees or export formats (CSV).
+  - Per-period comparisons (e.g., month-over-month, year-over-year).
+  - Integration with tax/fees calculations.
+  - Export formats (CSV, PDF) for income reports.
+  - Advanced analytics and reporting dashboards.
 
-- **Search & filtering** ✅ **COMPLETE**
-  - Bookings now support status + date-range + appointment date filtering.
-  - Pagination implemented for large result sets.
-  - Smart sorting (upcoming first, then past) implemented.
-  - Additional filters (by customer name, service category, or price bands) can be added as future enhancements if needed.
+- **Search & filtering enhancements** (future improvements):
+  - Additional filters: customer name, service category, price bands.
+  - Full-text search for bookings and customer information.
+  - Advanced sorting options (by price, duration, service type).
+  - Export filtered booking lists to CSV.
 
-- **Security / production readiness**
-  - A dedicated pass to harden security:
-    - Cookie flags (`HttpOnly`, `Secure`).
+- **Security / production readiness** (intentionally deferred):
+  - Cookie flags hardening (`HttpOnly`, `Secure`, `SameSite`).
     - Centralized auth guards for admin-only routes.
-    - Rate-limiting strategy review.
-  - This is intentionally deferred, per the "do not fix stronger security hardening yet" requirement.
+  - Rate-limiting strategy review and fine-tuning.
+  - CSRF protection implementation.
+  - Input sanitization and validation improvements.
+  - API key authentication for service-to-service calls.
 
-- **Performance optimizations**
-  - Consider indexing on frequently queried fields (appointment dates, status).
-  - Evaluate caching strategy for schedule and service catalog data.
-  - Consider database query optimization for large booking datasets.
+- **Performance optimizations**:
+  - Database indexing on frequently queried fields:
+    - Appointment dates, booking status
+    - Customer email, phone for lookup queries
+    - Schedule dates and time slots
+    - Blog post slugs for slug-based queries
+  - Caching strategy:
+    - Cache schedule and service catalog data (low-frequency changes)
+    - Cache blog posts with TTL
+    - Redis integration for session management
+  - Database query optimization:
+    - Optimize booking aggregation queries
+    - Consider database connection pooling tuning
+    - Evaluate query performance for large datasets
+
+- **Additional features** (future considerations):
+  - Booking reminders (email/SMS notifications before appointment)
+  - Customer feedback/rating system
+  - Loyalty program or rewards system
+  - Multi-location support (if needed)
+  - Staff management and scheduling
+  - Inventory management for products
+
+**Note:** Admin notification emails are ✅ **COMPLETE** - Email notifications to both customers and owners are implemented in `createBooking`.

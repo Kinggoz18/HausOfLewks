@@ -90,7 +90,6 @@ export default function AdminSidebar() {
   ];
 
   const onLogoutClick = async () => {
-    console.log({ user });
     if (!user?._id) return;
 
     await authAPI.logoutUser(user?._id);

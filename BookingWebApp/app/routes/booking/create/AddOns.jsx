@@ -20,7 +20,6 @@ const RenderAddOns = (props) => {
    */
   const handleSetAddOns = (addOn) => {
     const isAdded = isSelected(addOn);
-    console.log({ isAdded });
     if (isAdded) {
       setSelectedService((prev) => ({
         ...prev,
@@ -150,7 +149,6 @@ export default function AddOns() {
         )
           return addon;
       });
-      console.log({ response, filtered });
       setSelectedAddons(filtered);
     } catch (error) {
       setFeedbackMessage(error?.message);

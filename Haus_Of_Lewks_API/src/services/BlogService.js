@@ -1,5 +1,6 @@
 import BlogModel from '../models/Blog.js';
 import { ReturnObject } from '../util/returnObject.js';
+import logger from '../util/logger.js';
 
 export class BlogService {
   /**
@@ -40,7 +41,7 @@ export class BlogService {
       const response = ReturnObject(true, newBlogPost);
       return res.status(201).send(response);
     } catch (error) {
-      console.log('Error in createBlogPost:', error?.message ?? error);
+      logger.error('Error in createBlogPost', error);
       if (error.code === 11000) {
         const response = ReturnObject(false, 'Blog slug must be unique');
         return res.status(400).send(response);
@@ -72,7 +73,7 @@ export class BlogService {
       const response = ReturnObject(true, blogPosts);
       return res.status(200).send(response);
     } catch (error) {
-      console.log('Error in getAllBlogPosts:', error?.message ?? error);
+      logger.error('Error in getAllBlogPosts', error);
       const response = ReturnObject(
         false,
         'Something went wrong while getting blog posts'
@@ -100,7 +101,7 @@ export class BlogService {
       const response = ReturnObject(true, blogPost);
       return res.status(200).send(response);
     } catch (error) {
-      console.log('Error in getBlogPostById:', error?.message ?? error);
+      logger.error('Error in getBlogPostById', error);
       const response = ReturnObject(
         false,
         'Something went wrong while getting blog post'
@@ -121,7 +122,7 @@ export class BlogService {
     const invalidPatterns = /\.(js|map|css|json|ts|tsx|jsx|html|xml|txt|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/i;
     const validSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 
-    console.log({ slug });
+    logger.debug('Getting blog post by slug', { slug });
     if (!slug || invalidPatterns.test(slug) || !validSlugPattern.test(slug)) {
       const response = ReturnObject(false, 'Blog post not found');
       return res.status(404).send(response);
@@ -130,7 +131,7 @@ export class BlogService {
     try {
       const blogPost = await BlogModel.findOne({ slug, isPublished: true });
 
-      console.log({ blogPost, slug });
+      logger.debug('Blog post found', { slug, hasBlogPost: !!blogPost });
       if (!blogPost) {
         const response = ReturnObject(false, 'Blog post not found');
         return res.status(404).send(response);
@@ -139,7 +140,7 @@ export class BlogService {
       const response = ReturnObject(true, blogPost);
       return res.status(200).send(response);
     } catch (error) {
-      console.log('Error in getBlogPostBySlug:', error?.message ?? error);
+      logger.error('Error in getBlogPostBySlug', error);
       const response = ReturnObject(
         false,
         'Something went wrong while getting blog post'
@@ -184,7 +185,7 @@ export class BlogService {
       const response = ReturnObject(true, blogPost);
       return res.status(200).send(response);
     } catch (error) {
-      console.log('Error in updateBlogPost:', error?.message ?? error);
+      logger.error('Error in updateBlogPost', error);
       if (error.code === 11000) {
         const response = ReturnObject(false, 'Blog slug must be unique');
         return res.status(400).send(response);
@@ -216,7 +217,7 @@ export class BlogService {
       const response = ReturnObject(true, 'Blog post deleted successfully');
       return res.status(200).send(response);
     } catch (error) {
-      console.log('Error in deleteBlogPost:', error?.message ?? error);
+      logger.error('Error in deleteBlogPost', error);
       const response = ReturnObject(
         false,
         'Something went wrong while deleting blog post'

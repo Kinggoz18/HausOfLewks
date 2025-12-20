@@ -1,6 +1,48 @@
 import axios from "axios";
 import { getApiUrl } from "../../app/config/config";
 
+// Helper function to check if we're in development mode
+const isDev = () => {
+  return typeof window !== 'undefined' 
+    ? window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    : process.env.NODE_ENV !== 'production';
+};
+
+// Helper function to handle API errors with user-friendly messages
+const handleApiError = (error, defaultMessage) => {
+  if (isDev()) {
+    console.error(defaultMessage, error?.message ?? error);
+  }
+
+  // Check for network errors
+  if (error?.code === 'ERR_NETWORK' || error?.message?.includes('Network Error')) {
+    return new Error("Unable to connect to the server. Please check your internet connection and try again.");
+  }
+
+  // Check for timeout errors
+  if (error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
+    return new Error("Request timed out. Please try again.");
+  }
+
+  // Check for HTTP errors
+  if (error?.response) {
+    const status = error.response.status;
+    if (status === 404) {
+      return new Error("The requested resource was not found. Please try again.");
+    }
+    if (status === 500) {
+      return new Error("Server error occurred. Please try again later.");
+    }
+    if (status >= 400 && status < 500) {
+      // Use server error message if available, otherwise use default
+      return new Error(error.response.data?.content || error.response.data?.message || defaultMessage);
+    }
+  }
+
+  // Return server message if available, otherwise use default
+  return new Error(error?.message || defaultMessage);
+};
+
 export default class ScheduleAPI {
   constructor() {
     this.apiUrl = `${getApiUrl()}/schedule`;
@@ -12,11 +54,7 @@ export default class ScheduleAPI {
       if (!response.isSuccess) throw new Error(response?.content);
       return response?.content;
     } catch (error) {
-      console.error(
-        "Error while trying to create schedule:",
-        error?.message ?? error
-      );
-      throw new Error("Error while trying to create schedule");
+      throw handleApiError(error, "An error occurred while trying to create schedule");
     }
   };
 
@@ -26,11 +64,7 @@ export default class ScheduleAPI {
       if (!response.isSuccess) throw new Error(response?.content);
       return response?.content;
     } catch (error) {
-      console.error(
-        "Error while trying to get schedule:",
-        error?.message ?? error
-      );
-      throw new Error("An error occured while trying to get schedule");
+      throw handleApiError(error, "An error occurred while trying to get schedule");
     }
   };
 
@@ -42,11 +76,7 @@ export default class ScheduleAPI {
       if (!response.isSuccess) throw new Error(response?.content);
       return response?.content;
     } catch (error) {
-      console.error(
-        "Error while trying to get schedule:",
-        error?.message ?? error
-      );
-      throw new Error("An error occured while trying to get schedule");
+      throw handleApiError(error, "An error occurred while trying to delete schedule");
     }
   };
 
@@ -56,11 +86,7 @@ export default class ScheduleAPI {
       if (!response.isSuccess) throw new Error(response?.content);
       return response?.content;
     } catch (error) {
-      console.error(
-        "Error while trying to get schedule:",
-        error?.message ?? error
-      );
-      throw new Error("An error occured while trying to get schedule");
+      throw handleApiError(error, "An error occurred while trying to update schedule");
     }
   };
 
@@ -71,11 +97,7 @@ export default class ScheduleAPI {
       if (!response.isSuccess) throw new Error(response?.content);
       return response?.content;
     } catch (error) {
-      console.error(
-        "Error while trying to get schedule:",
-        error?.message ?? error
-      );
-      throw new Error("An error occured while trying to get schedule");
+      throw handleApiError(error, "An error occurred while trying to remove time slot");
     }
   };
 }

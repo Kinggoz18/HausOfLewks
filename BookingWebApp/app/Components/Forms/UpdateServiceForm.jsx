@@ -14,7 +14,6 @@ const UpdateServiceForm = (props) => {
     categories,
   } = props;
 
-  console.log({ serviceToUpdate });
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState(null);

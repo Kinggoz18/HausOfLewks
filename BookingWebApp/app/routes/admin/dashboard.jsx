@@ -6,6 +6,7 @@ import ExpandedAppointment from "../../Components/ExpandedAppointment";
 import BookingAPI from "../../../storage/APIs/bookings";
 import ScheduleAPI from "../../../storage/APIs/schedule";
 import useValidateAdmin from "./useValidateAdmin";
+import { PageLoader, ErrorState, EmptyState } from "../../Components/LoadingStates";
 
 export default function Dashboard() {
   const date = new Date();
@@ -180,11 +181,6 @@ export default function Dashboard() {
         />
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          {error}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <div className="bg-white/80 rounded-xl p-4 sm:p-6 shadow-sm">
@@ -192,11 +188,21 @@ export default function Dashboard() {
             {getAppointmentsTitle(selectedDate)}
           </h2>
           {isLoading ? (
-            <div className="text-center py-8 text-neutral-600">Loading appointments...</div>
-          ) : appointments.length === 0 ? (
-            <div className="text-center py-8 text-neutral-600">
-              No appointments for this day
+            <div className="text-center py-8" role="status" aria-live="polite">
+              <div className="inline-block w-8 h-8 border-3 border-primary-purple/30 border-t-primary-purple rounded-full animate-spin mb-3" aria-hidden="true"></div>
+              <p className="text-neutral-600 text-sm">Loading appointments...</p>
             </div>
+          ) : error ? (
+            <ErrorState 
+              title="Failed to load appointments"
+              message={error}
+              onRetry={() => fetchAppointments(selectedDate)}
+            />
+          ) : appointments.length === 0 ? (
+            <EmptyState 
+              title="No appointments"
+              description={`No appointments scheduled for ${formatDate(selectedDate)}.`}
+            />
           ) : (
             <RenderAppointments
               appointments={appointments}

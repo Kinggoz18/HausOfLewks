@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import UserService from '../services/UserService.js';
 import rateLimit from 'express-rate-limit';
 import signupAdminMiddleware from '../Middlewares/authMiddleware.js';
+import logger from '../util/logger.js';
 
 export class UserRoutes {
   authRateLimit = rateLimit({
@@ -52,7 +53,7 @@ export class UserRoutes {
       );
       router.get(`${this.basePath}/logout/:userId`, this.userService.logout);
     } catch (error) {
-      console.error(error?.message ?? error ?? 'Failed to initialize routes');
+      logger.error('Failed to initialize user routes', error);
     }
   }
 }

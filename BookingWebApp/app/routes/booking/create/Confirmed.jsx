@@ -71,8 +71,6 @@ export default function ConfrimBooking() {
   const selectedAddons = selectedBookingService?.service?.AddOns;
   const bookingStartTime = selectedBookingService?.startTime;
 
-  console.log({ selectedBookingService });
-
   const bookingEndTime = bookingEndtime(
     selectedBookingService,
     selectedAddons,
@@ -82,8 +80,6 @@ export default function ConfrimBooking() {
   const onReturnClick = async () => {
     navigate("/booking/create");
   };
-
-  console.log({ bookingDate, bookingStartTime, bookingEndTime });
 
   // Load add-to-calendar button only on the client to avoid SSR/hydration issues
   useEffect(() => {

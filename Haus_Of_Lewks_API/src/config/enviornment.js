@@ -19,10 +19,12 @@ const googleEnvVariables = {
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   googleCallbackUrl: process.env.GOOGLE_CALLBACK_URL ?? '',
-  googleServiceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? '',
-  googleServiceAccountKey: process.env.GOOGLE_SERVICE_ACCOUNT_KEY ?? '',
+  googleEmail: process.env.GOOGLE_SERVICE_EMAIL ?? '',
+  googleAppPassword: process.env.GOOGLE_APP_PASSWORD ?? '',
   driveImagesFolderId: process.env.DRIVE_IMAGES_FOLDER_ID ?? '',
-  driveVideosFolderId: process.env.DRIVE_VIDEOS_FOLDER_ID ?? ''
+  driveVideosFolderId: process.env.DRIVE_VIDEOS_FOLDER_ID ?? '',
+  // Gmail account type: 'personal' (500 limit) or 'workspace' (2000 limit)
+  googleAccountType: process.env.GOOGLE_ACCOUNT_TYPE ?? 'personal'
 };
 
 const digitaloceanEnvVariables = {

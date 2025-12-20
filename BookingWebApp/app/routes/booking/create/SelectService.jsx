@@ -205,10 +205,9 @@ export default function SelectService() {
         }
       });
 
-      console.log({ result, services });
       setServices(result);
     } catch (error) {
-      console.error("Failed to fetch services", error);
+      // Error is handled by the API layer and will throw with user-friendly message
       return {
         categories: [],
         services: [],

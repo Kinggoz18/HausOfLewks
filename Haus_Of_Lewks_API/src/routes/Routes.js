@@ -25,9 +25,7 @@ export class APIRoutes {
 
       this.router = express.Router();
     } catch (error) {
-      console.error(
-        error?.messsage ?? error ?? 'Failed to initialize routes in constructor'
-      );
+      // Error already logged by route initialization, no need to log again
     }
   }
 
@@ -46,7 +44,7 @@ export class APIRoutes {
 
       return this.router;
     } catch (error) {
-      console.error(error?.messsage ?? error ?? 'Failed to initialize routes');
+      // Error already logged by route initialization, no need to log again
       return this.router;
     }
   }

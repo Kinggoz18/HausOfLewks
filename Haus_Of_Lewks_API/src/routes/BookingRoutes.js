@@ -1,5 +1,6 @@
 import { BookingService } from '../services/BookingService.js';
 import rateLimit from 'express-rate-limit';
+import logger from '../util/logger.js';
 
 export class BookingRoute {
   bookingRateLimit = rateLimit({
@@ -36,15 +37,18 @@ export class BookingRoute {
         `${this.basePath}/:bookingId`,
         this.bookingService.getBookingById
       );
+      // Admin-only: Update booking (status, price) - requires admin authentication
       router.post(
         `${this.basePath}/update`,
         this.bookingRateLimit,
         this.bookingService.updateBookingById
       );
+      // Public: Users can find their bookings by providing their contact info
       router.post(
         `${this.basePath}/find-user-bookings`,
         this.bookingService.getUserBookings
       );
+      // Admin-only: Cancel booking - requires admin authentication (users cannot cancel directly)
       router.post(
         `${this.basePath}/cancel`,
         this.bookingRateLimit,
@@ -55,7 +59,7 @@ export class BookingRoute {
         this.bookingService.getIncomeReport
       );
     } catch (error) {
-      console.error(error?.message ?? error ?? 'Failed to initialize routes');
+      logger.error('Failed to initialize booking routes', error);
     }
   }
 }

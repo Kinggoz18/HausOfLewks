@@ -8,7 +8,6 @@ export default function Layout() {
   const isLoginPage = path.pathname === "/admin/login";
   /********************************* {UseEffect Hooks} ***************************************/
   useEffect(() => {
-    console.log({ path });
     if (path.pathname === "/admin") {
       window.location.href = "/admin/dashboard";
     }
