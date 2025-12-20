@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 import BookingModel from '../models/Bookings.js';
 import ScheduleModel from '../models/Schedule.js';
 import { ReturnObject } from '../util/returnObject.js';
@@ -14,7 +15,8 @@ import {
   sanitizePhone, 
   validateObjectId, 
   validateNumber,
-  validateRequired 
+  validateRequired, 
+  validateDate
 } from '../util/inputValidator.js';
 
 export class BookingService {
@@ -578,6 +580,14 @@ export class BookingService {
    */
   getBookingSummary = async (req, res) => {
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/dd0cc213-dc1d-4cc3-b500-bf77b0de2dae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BookingService.js:584',message:'getBookingSummary entry - checking connection state',data:{mongooseReadyState:mongoose.connection.readyState,readyStateName:['disconnected','connected','connecting','disconnecting'][mongoose.connection.readyState],host:mongoose.connection.host,name:mongoose.connection.name,hasConnection:!!mongoose.connection},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,D'})}).catch(()=>{});
+      // #endregion
+      // #region agent log
+      if (mongoose.connection.readyState !== 1) {
+        fetch('http://127.0.0.1:7243/ingest/dd0cc213-dc1d-4cc3-b500-bf77b0de2dae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BookingService.js:587',message:'WARNING: Connection not ready before queries',data:{readyState:mongoose.connection.readyState,readyStateName:['disconnected','connected','connecting','disconnecting'][mongoose.connection.readyState]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,D'})}).catch(()=>{});
+      }
+      // #endregion
       const [completed, upcoming, cancelled, missed, total] = await Promise.all(
         [
           BookingModel.countDocuments({ status: 'Completed' }),
@@ -596,8 +606,14 @@ export class BookingService {
         total
       });
 
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/dd0cc213-dc1d-4cc3-b500-bf77b0de2dae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BookingService.js:603',message:'getBookingSummary success - queries completed',data:{completed,upcoming,cancelled,missed,total,mongooseReadyState:mongoose.connection.readyState},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,D'})}).catch(()=>{});
+      // #endregion
       return res.status(200).send(response);
     } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/dd0cc213-dc1d-4cc3-b500-bf77b0de2dae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BookingService.js:606',message:'getBookingSummary error - connection state at error',data:{errorMessage:error?.message,errorCode:error?.code,errorName:error?.name,mongooseReadyState:mongoose.connection.readyState,readyStateName:['disconnected','connected','connecting','disconnecting'][mongoose.connection.readyState],host:mongoose.connection.host},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
+      // #endregion
       logger.error('Error in getBookingSummary', error);
       const response = ReturnObject(
         false,
