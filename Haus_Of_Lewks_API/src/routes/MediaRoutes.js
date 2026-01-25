@@ -16,25 +16,15 @@ export class MediaRoute {
 
   basePath = '/media';
 
-  /**
-   * Default constructor
-   * @param {MediaService} mediaService
-   */
   constructor(mediaService) {
     this.mediaService = mediaService;
     this.googleDriveManager = new GoogleDriveManager();
   }
 
-  /**
-   * Initialize Media routes
-   * @param {Router} router
-   */
   async initRoutes(router, upload) {
     try {
-      // GET all media (public)
       router.get(`${this.basePath}`, this.mediaService.getAllMedia);
 
-      // POST create media (admin)
       router.post(
         `${this.basePath}/create`,
         this.bookingRateLimit,
@@ -42,14 +32,12 @@ export class MediaRoute {
         this.mediaService.addMedia
       );
 
-      // POST delete media (admin)
       router.post(
         `${this.basePath}/delete`,
         this.bookingRateLimit,
         this.mediaService.deleteMedia
       );
 
-      // GET image from drive (public)
       router.get(
         `${this.basePath}/drive/:id`,
         this.serveImageFileDriveRateLimit,

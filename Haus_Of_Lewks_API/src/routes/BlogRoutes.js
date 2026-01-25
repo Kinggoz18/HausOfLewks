@@ -10,18 +10,10 @@ export class BlogRoute {
 
   basePath = '/blog';
 
-  /**
-   * Default constructor
-   * @param {BlogService} blogService
-   */
   constructor(blogService) {
     this.blogService = blogService;
   }
 
-  /**
-   * Initialize Blog routes
-   * @param {Router} router
-   */
   async initRoutes(router) {
     try {
       router.post(`${this.basePath}`, this.blogRateLimit, this.blogService.createBlogPost);

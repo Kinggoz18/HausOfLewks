@@ -1,12 +1,6 @@
 import { serverEnvVaiables } from '../config/enviornment.js';
 import { ReturnObject } from '../util/returnObject.js';
 
-/**
- * Login admin handler
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @param {import('express').NextFunction} next
- */
 const signupAdminMiddleware = async (req, res, next) => {
   try {
     const { signupcode, mode } = req.query;

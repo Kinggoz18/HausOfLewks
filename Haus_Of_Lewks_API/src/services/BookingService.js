@@ -19,39 +19,25 @@ import {
 } from '../util/inputValidator.js';
 
 export class BookingService {
-  /**
-   * @param {UserService} userService
-   * @param {ScheduleService} scheduleService
-   */
   constructor(userService, scheduleService) {
     this.userService = userService;
     this.scheduleService = scheduleService;
   }
 
-  /**
-   * Get email recipients (Owners only, not Developer or Employee)
-   * @returns {Promise<string[]>} Array of owner email addresses
-   */
+  // Returns only owner emails, not developers or employees
   getOwnerEmails = async () => {
     try {
       const owners = await AdminModel.find({ role: 'Owner' }).select('googleEmail');
       return owners
         .map((owner) => owner.googleEmail)
-        .filter((email) => email); // Filter out null/undefined emails
+        .filter((email) => email);
     } catch (error) {
       logger.error('Error getting owner emails', error);
       return [];
     }
   };
 
-  /**
-   * Creates a user booking
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns
-   */
   createBooking = async (req, res) => {
-    // Sanitize and validate input
     const rawData = req.body;
     const firstName = sanitizeString(rawData.firstName, 100);
     const lastName = sanitizeString(rawData.lastName, 100);
@@ -64,7 +50,6 @@ export class BookingService {
     const service = rawData.service;
 
     try {
-      // Validate required fields
       const requiredValidation = validateRequired(
         { firstName, lastName, phone, email, startTime, scheduleId, service },
         ['firstName', 'lastName', 'phone', 'email', 'startTime', 'scheduleId', 'service']
@@ -87,7 +72,6 @@ export class BookingService {
         return res.status(400).send(response);
       }
 
-      //Get the customer
       const user = await this.userService.getCustomerForBooking(
         firstName,
         lastName,

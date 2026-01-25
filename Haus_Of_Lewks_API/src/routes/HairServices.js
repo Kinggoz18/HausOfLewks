@@ -10,21 +10,12 @@ export class HairServicesRoute {
 
   basePath = '/hair-service';
 
-  /**
-   * Default constructor
-   * @param {HairServices} hairService
-   */
   constructor(hairService) {
     this.hairService = hairService;
   }
 
-  /**
-   * Initialize HairServices routes
-   * @param {Router} router
-   */
   async initRoutes(router, upload) {
     try {
-      /****************************** Add Routes ****************************/
       router.post(`${this.basePath}/service`, this.bookingRateLimit, this.hairService.addHairService);
       router.post(
         `${this.basePath}/category`,
@@ -34,7 +25,6 @@ export class HairServicesRoute {
       );
       router.post(`${this.basePath}/add-on`, this.bookingRateLimit, this.hairService.addAddOn);
 
-      /****************************** Delete Routes ***************************/
       router.post(
         `${this.basePath}/service/:id`,
         this.bookingRateLimit,
@@ -47,7 +37,6 @@ export class HairServicesRoute {
       );
       router.post(`${this.basePath}/add-on/:id`, this.bookingRateLimit, this.hairService.removeAddon);
 
-      /****************************** Update Routes ***************************/
       router.post(
         `${this.basePath}/update/service`,
         this.bookingRateLimit,
@@ -64,7 +53,7 @@ export class HairServicesRoute {
         this.bookingRateLimit,
         this.hairService.updateAddon
       );
-      /****************************** Get Routes ****************************/
+
       router.get(`${this.basePath}`, this.hairService.getServicesByCategory);
       router.get(`${this.basePath}/category`, this.hairService.getCategories);
       router.get(`${this.basePath}/add-on`, this.hairService.getAddons);

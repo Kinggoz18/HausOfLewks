@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 import { serverEnvVaiables } from './enviornment.js';
 
-/**
- * Initalize a mongodb connection
- * @returns A mongoDb connection client
- */
 const connectToDb = async () => {
   try {
     if (!serverEnvVaiables?.mongoDbUrl) throw new Error('MongoDb URL is null');

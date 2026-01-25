@@ -12,18 +12,10 @@ export class UserRoutes {
 
   basePath = '/user';
 
-  /**
-   * Default constructor
-   * @param {UserService} userService
-   */
   constructor(userService) {
     this.userService = userService;
   }
 
-  /**
-   * Initialize User routes
-   * @param {Router} router
-   */
   async initRoutes(router) {
     try {
       router.get(

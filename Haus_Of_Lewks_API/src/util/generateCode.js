@@ -13,12 +13,11 @@ function generateCode(length) {
   return code;
 }
 
-//Double signed-csrf token asper: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#pseudo-code-for-implementing-hmac-csrf-tokens
+// Double-signed CSRF token per OWASP guidelines
 const getCSRFToken = async (authId) => {
   const secret = serverEnvVaiables.jwtSecret;
   const randomValue = getRandomValue(128);
 
-  // Create the CSRF Token
   const message =
     authId.length + '!' + authId + '!' + randomValue.length + '!' + randomValue;
   const hmac = crypto
@@ -40,7 +39,6 @@ const getRandomValue = (length) => {
   return text;
 };
 
-// Method to validate the CSRF Token
 const validateCSRFToken = (csrfToken, authId) => {
   const [hmac, randomValue] = csrfToken.split('.');
   const secret = serverEnvVaiables.jwtSecret;

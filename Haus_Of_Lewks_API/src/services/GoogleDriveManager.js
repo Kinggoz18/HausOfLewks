@@ -7,23 +7,17 @@ import { data } from '@remix-run/node';
 import logger from '../util/logger.js';
 
 export class GoogleDriveManager {
-  /**
-   * Default constructor
-   */
   constructor() {
     this.oauth2Client = null;
     this.googleDrive = null;
   }
 
-  /**
-   * Initialize OAuth2 client with refresh token
-   */
   initOAuthWithRefreshToken = async () => {
     if (!this.oauth2Client) {
       this.oauth2Client = new google.auth.OAuth2(
         googleEnvVariables.googleClientId,
         googleEnvVariables.googleClientSecret,
-        googleEnvVariables.googleCallbackUrl // FIXED
+        googleEnvVariables.googleCallbackUrl
       );
     }
 
@@ -47,24 +41,12 @@ export class GoogleDriveManager {
     return this.googleDrive;
   };
 
-  /***********************************************************************************************/
-  // File operations
-  /***********************************************************************************************/
-  /**
-   * Generate file name for uploaded media
-   * @param {*} userId
-   * @returns
-   */
   generateFileName() {
     const timestamp = Date.now();
     const shortUuid = uuidv4();
     return `${timestamp}${shortUuid}`.replace(/[^a-zA-Z0-9]/g, '');
   }
 
-  /**
-   * Uploads an image to the Google Drive folder
-   * @param {*} imageBuffers
-   */
   uploadImageToFolder = async (imageBuffers) => {
     try {
       if (!this.googleDrive) {
@@ -141,10 +123,6 @@ export class GoogleDriveManager {
     }
   };
 
-  /**
-   * Uploads a video to the Google Drive folder
-   * @param {*} videoBuffer
-   */
   uploadVideoToFolder = async (videoBuffer) => {
     try {
       if (!this.googleDrive) {
@@ -185,10 +163,6 @@ export class GoogleDriveManager {
     }
   };
 
-  /**
-   * Deletes a video/image from the Google Drive folder
-   * @param {*} driveId
-   */
   deleteFileFromDrive = async (driveId) => {
     try {
       if (!this.googleDrive) await this.initOAuthWithRefreshToken();

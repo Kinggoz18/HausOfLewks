@@ -14,36 +14,20 @@ import GoogleDriveModel from '../models/GoogleDrive.js';
 import EmailService from './EmailService.js';
 import logger from '../util/logger.js';
 
-/**
- * @class UserService
- * @classdesc Handles user-related logic
- */
 class UserService {
-  /**
-   * Default User service constructor
-   * @param {import('mongoose').Model<UserModel>} userModel
-   */
   constructor() {
     this.googleDriveManager = new GoogleDriveManager();
   }
 
-  /**
-   * Login admin
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   googleAuthHandler = (req, res, next) => {
     try {
       logger.debug('Google sign up initiated');
       const { mode } = req.query;
       
-      // Parse state from query if provided (contains mode and role for signup)
       let stateObj = { mode };
       if (req.query.state) {
         try {
           const parsedState = JSON.parse(decodeURIComponent(req.query.state));
-          // Merge parsed state (which includes role for signup) with mode
-          // Ensure mode takes precedence if it's in both places
           stateObj = { ...parsedState, mode };
           logger.debug('Parsed state for OAuth', { stateObj });
         } catch (e) {
@@ -51,7 +35,6 @@ class UserService {
         }
       }
       
-      // Ensure state object is properly formatted for OAuth
       const stateString = JSON.stringify(stateObj);
       
       passport.authenticate('google', {
@@ -73,11 +56,6 @@ class UserService {
     }
   };
 
-  /**
-   * Login admin callback
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   googleAuthHandlerCallback = (req, res, next) => {
     const appUrl = (params) =>
       `${serverEnvVaiables.cmsFrontendUrl}/admin/login?${params?.toString()}`;
@@ -174,24 +152,17 @@ class UserService {
     }
   };
 
-  /**
-   * Google Drive authentication callback
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {Promise<void>}
-   */
   googleDriveAuthHandlerCallback = async (req, res) => {
     try {
       const appUrl = () => `${serverEnvVaiables.cmsFrontendUrl}/admin`;
 
-      const code = req.query.code; // Google sends ?code=xxxx
+      const code = req.query.code;
       const tokens = await this.googleDriveManager.setTokens(code);
 
-      // Save refresh_token securely in DB for future use
       logger.debug('Refresh token received', { hasToken: !!tokens.refresh_token });
 
-      await GoogleDriveModel.deleteMany({}); //Delete previous refresh tokens
-      await GoogleDriveModel.create({ refreshToken: tokens.refresh_token }); //Create new refresh token
+      await GoogleDriveModel.deleteMany({});
+      await GoogleDriveModel.create({ refreshToken: tokens.refresh_token });
 
       return res.redirect(appUrl(params));
     } catch (error) {
@@ -199,23 +170,13 @@ class UserService {
     }
   };
 
-  /**
-   * Creates or gets a customer before booking
-   * @param {string} firstName
-   * @param {string} lastName
-   * @param {string} phone
-   * @param {string} email
-   * @returns {}
-   */
   getCustomerForBooking = async (firstName, lastName, phone, email) => {
     try {
-      // Try to find an existing customer
       let customer = await UserModel.findOne({ phone, email }).populate(
         'bookings'
       );
 
       if (!customer) {
-        // Create a new user if not found
         const newUser = await UserModel.create({
           firstName,
           lastName,
@@ -238,12 +199,6 @@ class UserService {
     }
   };
 
-  /**
-   * Gets a customer by their Id
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {import('../util/returnObject').ResponseType}
-   */
   getCustomerById = async (req, res) => {
     try {
       const { customerId } = req.params;
@@ -252,7 +207,6 @@ class UserService {
         role: 'Customer'
       }).populate('bookings');
 
-      //If the customer does not exist
       if (!customer) {
         const response = ReturnObject(false, 'Customer not found');
         return res.status(404).send(response);

@@ -7,14 +7,6 @@ import { AppProvider } from "../storage/AppProvider";
 import ErrorBoundary from "./Components/ErrorBoundary";
 import { checkAndExecuteScheduledRefresh } from "./util/sitemapRefresh";
 
-/*****
- * TODO:
- * 3. Secure backend admin routes
- * 4. Add rate limit to certain endpoints
- * 5. Complete the blog section
- * 7. Add custom service to the service listing
- */
-
 export default function App() {
   const path = useLocation();
   const pathname = path.pathname;
@@ -35,13 +27,11 @@ export default function App() {
       <body className="overflow-x-hidden h-screen w-screen min-w-screen min-h-screen">
         <ErrorBoundary>
           <AppProvider>
-            {/* Don't show CustomNavbar on admin or booking routes (they have their own navbars) */}
             {pathname.includes("/admin") || pathname.includes("/booking") ? null : <CustomNavbar />}
             <ErrorBoundary message="An error occurred while loading the page content.">
               <Outlet />
             </ErrorBoundary>
           </AppProvider>
-          {/* Don't show Footer on admin or booking routes */}
           {pathname.includes("/admin") || pathname.includes("/booking") ? null : <Footer />}
         </ErrorBoundary>
         <ScrollRestoration />

@@ -8,12 +8,8 @@ import { MediaRoute } from './MediaRoutes.js';
 import { BlogRoute } from './BlogRoutes.js';
 
 export class APIRoutes {
-  /**
-   * Default constructor
-   */
   constructor() {
     try {
-      //Initialize services
       const services = new Services().initServices();
 
       this.userRoutes = new UserRoutes(services.userService);
@@ -25,14 +21,10 @@ export class APIRoutes {
 
       this.router = express.Router();
     } catch (error) {
-      // Error already logged by route initialization, no need to log again
+      // Error already logged by route initialization
     }
   }
 
-  /**
-   * Initialize the routes
-   * @returns
-   */
   async initAllRoutes(upload) {
     try {
       await this.userRoutes.initRoutes(this.router);
@@ -44,7 +36,7 @@ export class APIRoutes {
 
       return this.router;
     } catch (error) {
-      // Error already logged by route initialization, no need to log again
+      // Error already logged by route initialization
       return this.router;
     }
   }

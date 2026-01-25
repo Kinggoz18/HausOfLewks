@@ -10,18 +10,10 @@ export class BookingRoute {
 
   basePath = '/booking';
 
-  /**
-   * Default constructor
-   * @param {BookingService} bookingService
-   */
   constructor(bookingService) {
     this.bookingService = bookingService;
   }
 
-  /**
-   * Initialize Booking routes
-   * @param {Router} router
-   */
   async initRoutes(router) {
     try {
       router.post(`${this.basePath}`, this.bookingRateLimit, this.bookingService.createBooking);
@@ -37,18 +29,15 @@ export class BookingRoute {
         `${this.basePath}/:bookingId`,
         this.bookingService.getBookingById
       );
-      // Admin-only: Update booking (status, price) - requires admin authentication
       router.post(
         `${this.basePath}/update`,
         this.bookingRateLimit,
         this.bookingService.updateBookingById
       );
-      // Public: Users can find their bookings by providing their contact info
       router.post(
         `${this.basePath}/find-user-bookings`,
         this.bookingService.getUserBookings
       );
-      // Admin-only: Cancel booking - requires admin authentication (users cannot cancel directly)
       router.post(
         `${this.basePath}/cancel`,
         this.bookingRateLimit,

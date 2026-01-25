@@ -8,7 +8,6 @@ import { digitaloceanEnvVariables } from '../config/enviornment.js';
 
 export class DigitalOceanSpacesManager {
   s3Client = null;
-
   constructor() {
     this.s3Client = new S3Client({
       endpoint: 'https://tor1.digitaloceanspaces.com',

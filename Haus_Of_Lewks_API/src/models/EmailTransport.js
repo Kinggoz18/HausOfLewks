@@ -11,20 +11,19 @@ const EmailTransportSchema = new mongoose.Schema(
       type: Date,
       required: true,
       default: Date.now,
-      index: true // Index for efficient querying by date
+      index: true
     },
     emailType: {
       type: String,
-      default: 'general' // Can be 'booking', 'notification', etc.
+      default: 'general'
     }
   },
   { timestamps: true }
 );
 
-// Index for efficient queries on sentAt (for 24-hour rolling window)
-EmailTransportSchema.index({ sentAt: 1 }, { expireAfterSeconds: 86400 }); // Auto-delete after 24 hours
+// Auto-delete records after 24 hours to keep the collection lean
+EmailTransportSchema.index({ sentAt: 1 }, { expireAfterSeconds: 86400 });
 
-// Static method to get total recipients in the last 24 hours
 EmailTransportSchema.statics.getRecipientCountInLast24Hours = async function () {
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   
@@ -45,13 +44,11 @@ EmailTransportSchema.statics.getRecipientCountInLast24Hours = async function () 
   return result.length > 0 ? result[0].totalRecipients : 0;
 };
 
-// Static method to check if we can send emails with given recipient count
 EmailTransportSchema.statics.canSendEmails = async function (recipientCount, dailyLimit) {
   const currentCount = await this.getRecipientCountInLast24Hours();
   return (currentCount + recipientCount) <= dailyLimit;
 };
 
-// Static method to record an email send
 EmailTransportSchema.statics.recordEmailSend = async function (recipientCount, emailType = 'general') {
   return await this.create({
     recipientCount,
@@ -60,7 +57,6 @@ EmailTransportSchema.statics.recordEmailSend = async function (recipientCount, e
   });
 };
 
-// Static method to get current usage stats
 EmailTransportSchema.statics.getUsageStats = async function (dailyLimit) {
   const currentCount = await this.getRecipientCountInLast24Hours();
   const remaining = Math.max(0, dailyLimit - currentCount);

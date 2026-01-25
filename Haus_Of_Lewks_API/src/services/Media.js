@@ -4,18 +4,10 @@ import MediaModel from '../models/Media.js';
 import logger from '../util/logger.js';
 
 export class MediaService {
-  /**
-   * Default constructor
-   */
   constructor() {
     this.googleDriveManager = new GoogleDriveManager();
   }
 
-  /**
-   * Get all media with optional filters
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   getAllMedia = async (req, res) => {
     try {
       const { tag, type } = req.query;
@@ -42,11 +34,6 @@ export class MediaService {
     }
   };
 
-  /**
-   * Save a media
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   addMedia = async (req, res) => {
     const file = req?.file;
     let { type = 'Image', tag } = req.body;
@@ -61,18 +48,15 @@ export class MediaService {
         return res.status(400).send(response);
       }
 
-      // Parse tag if it's a JSON string (from FormData)
       let parsedTags = tag;
       if (typeof tag === 'string') {
         try {
           parsedTags = JSON.parse(tag);
         } catch {
-          // If it's not JSON, treat it as a single tag
           parsedTags = [tag];
         }
       }
 
-      // Ensure parsedTags is an array
       if (!Array.isArray(parsedTags)) {
         parsedTags = [parsedTags];
       }
@@ -110,11 +94,6 @@ export class MediaService {
     }
   };
 
-  /**
-   * Delete a media
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   deleteMedia = async (req, res) => {
     const { id } = req.body;
 
@@ -130,7 +109,6 @@ export class MediaService {
         return res.status(404).send(response);
       }
 
-      // Extract file ID from the Google Drive URL
       const driveUrl = mediaToDelete?.link;
       let fileId = null;
       if (driveUrl) {

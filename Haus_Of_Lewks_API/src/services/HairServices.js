@@ -7,18 +7,10 @@ import { GoogleDriveManager } from './GoogleDriveManager.js';
 import logger from '../util/logger.js';
 
 export class HairServices {
-  /**
-   * Default constructor
-   */
   constructor() {
     this.googleDriveManager = new GoogleDriveManager();
   }
 
-  /**
-   * Add a hair service
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   addHairService = async (req, res) => {
     const { title, price, category, duration } = req.body;
 
@@ -59,11 +51,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Add a category
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   addCategory = async (req, res) => {
     const file = req?.file;
     const { title } = req.body;
@@ -106,11 +93,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Add an add on
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   addAddOn = async (req, res) => {
     const { title, price, service, duration } = req.body;
 
@@ -147,12 +129,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Remove a category
-   * @param {*} req
-   * @param {*} res
-   * @returns
-   */
   removeCategory = async (req, res) => {
     const { id } = req.params;
     try {
@@ -161,14 +137,12 @@ export class HairServices {
         return res.status(400).send(response);
       }
 
-      //Check the category exists
       const categoryToDelete = await CategoryModel.findById(id);
       if (!categoryToDelete) {
         const response = ReturnObject(false, 'Media not found');
         return res.status(404).send(response);
       }
 
-      //Delete the coverLink, the hair services and the category
       await this.googleDriveManager.deleteFileFromDrive(
         categoryToDelete?.driveId
       );
@@ -186,12 +160,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Remove an add on
-   * @param {*} req
-   * @param {*} res
-   * @returns
-   */
   removeAddon = async (req, res) => {
     const { id } = req.params;
     try {
@@ -207,11 +175,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Get booking by id
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   removeHairService = async (req, res) => {
     const { id } = req.params;
     try {
@@ -227,11 +190,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Update a hair service by id
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   updateHairService = async (req, res) => {
     const { id, title, price, category, duration } = req.body;
 
@@ -242,10 +200,9 @@ export class HairServices {
         return res.status(404).send(response);
       }
 
-      // Update the addons
       if (title && serviceToUpdate.title !== title) {
         const addonsToUpdate = await AddOnsModel.find({
-          service: serviceToUpdate.title // old title
+          service: serviceToUpdate.title
         });
 
         await Promise.all(
@@ -259,7 +216,6 @@ export class HairServices {
         );
       }
 
-      //Update the supplied fields
       serviceToUpdate.title = title ?? serviceToUpdate.title;
       serviceToUpdate.price = price ?? serviceToUpdate.price;
       serviceToUpdate.category = category ?? serviceToUpdate.category;
@@ -288,11 +244,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Update a category by id
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   updateCategory = async (req, res) => {
     const file = req?.file;
     const { id, title } = req.body;
@@ -311,10 +262,9 @@ export class HairServices {
       }
 
       const servicesToUpdate = await HairServicesModel.find({
-        category: categoryToUpdate.title // old title
+        category: categoryToUpdate.title
       });
 
-      // Update the title
       if (title && categoryToUpdate.title !== title) {
         await Promise.all(
           servicesToUpdate.map(async (element) => {
@@ -328,14 +278,11 @@ export class HairServices {
       }
 
       let driveData = { publicUrl: null, driveId: null };
-      // Update the cover link if file is provided
       if (file) {
-        //Delete the previous image
         await this.googleDriveManager.deleteFileFromDrive(
           categoryToUpdate.driveId
         );
 
-        //Upload the new image
         driveData = await this.googleDriveManager.uploadImageToFolder(
           file?.buffer
         );
@@ -366,11 +313,6 @@ export class HairServices {
     }
   };
 
-  /**
-   * Update an addon by id
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   updateAddon = async (req, res) => {
     const { id, title, price, duration, service } = req.body;
 
@@ -381,7 +323,6 @@ export class HairServices {
         return res.status(404).send(response);
       }
 
-      //Update the supplied fields
       addOnToUpdate.title = title ?? addOnToUpdate.title;
       addOnToUpdate.price = price ?? addOnToUpdate.price;
       addOnToUpdate.duration = duration ?? addOnToUpdate.duration;

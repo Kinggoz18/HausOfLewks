@@ -209,9 +209,7 @@ export default function Appointments() {
   const successRef = useRef(null);
   const errorRef = useRef(null);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
-  /************************************************************************************************************************/
-  /*******************************************************{ Methods }******************************************************/
-  /************************************************************************************************************************/
+
   const formatDate = (date) => {
     const options = { weekday: "long", month: "short", day: "numeric" };
     return date.toLocaleDateString("en-US", options);
@@ -236,8 +234,7 @@ export default function Appointments() {
       setIsLoading(false);
     }
   };
-  
-  // Filter bookings based on search term, status, and date
+
   const filterBookings = () => {
     if (!bookings) return;
     

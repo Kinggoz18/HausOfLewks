@@ -9,7 +9,6 @@ export class Services {
   constructor() {}
 
   initServices = () => {
-    //Initialize services
     const mediaService = new MediaService();
     const userService = new UserService();
     const scheduleService = new ScheduleService();

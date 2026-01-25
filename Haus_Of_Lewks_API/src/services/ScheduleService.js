@@ -7,12 +7,6 @@ import logger from '../util/logger.js';
 export class ScheduleService {
   constructor() {}
 
-  /**
-   * Creates a user booking
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {ReturnType}
-   */
   createSchedule = async (req, res) => {
     const { year, month, day, startTime, endTime } = req.body;
 
@@ -26,9 +20,8 @@ export class ScheduleService {
         return res.status(400).send(response);
       }
 
-      // Check that the schedule date has not already passed
       const currentDate = new Date();
-      const scheduleDate = new Date(year, month - 1, day); // JS Date months are 0-indexed
+      const scheduleDate = new Date(year, month - 1, day);
 
       if (scheduleDate < currentDate.setHours(0, 0, 0, 0)) {
         const response = ReturnObject(false, 'Invalid schedule date');
@@ -36,10 +29,8 @@ export class ScheduleService {
         return res.status(400).send(response);
       }
 
-      // Create available slots (hourly from startTime to endTime)
       const availableSlots = this.generateAvailableSlots(startTime, endTime);
 
-      // Create the schedule in the database
       const newSchedule = await ScheduleModel.create({
         year,
         month,
@@ -51,23 +42,17 @@ export class ScheduleService {
       });
 
       const response = ReturnObject(true, newSchedule);
-      return res.status(201).send(response); // 201 = Created
+      return res.status(201).send(response);
     } catch (error) {
       const response = ReturnObject(
         false,
         'Something went wrong while creating schedule'
       );
       logger.error('Error in createSchedule', error);
-      return res.status(500).send(response); // 500 for unexpected server errors
+      return res.status(500).send(response);
     }
   };
 
-  /**
-   * Update a schedule
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {ReturnType}
-   */
   updateSchedule = async (req, res) => {
     const { scheduleId, year, month, day, startTime, endTime } = req.body;
 
@@ -93,7 +78,6 @@ export class ScheduleService {
         scheduleToUpdate.day = day;
       }
 
-      //Update the available slots along with the start and end time
       const scheduleEnd = endTime ? endTime : scheduleToUpdate.endTime;
       const scheduleStart = startTime ? startTime : scheduleToUpdate.startTime;
 
@@ -135,16 +119,10 @@ export class ScheduleService {
         'Something went wrong while updating schedule'
       );
       logger.error('Error in createSchedule', error);
-      return res.status(500).send(response); // 500 for unexpected server errors
+      return res.status(500).send(response);
     }
   };
 
-  /**
-   * Remove a timeslot from a schedule
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {Promise<void>}
-   */
   removeTimeslot = async (req, res) => {
     const { scheduleId, slot } = req.body;
 
@@ -156,17 +134,14 @@ export class ScheduleService {
         return res.status(404).send(response);
       }
 
-      // Ensure availableSlots is an array
       if (!Array.isArray(scheduleToUpdate.availableSlots)) {
         scheduleToUpdate.availableSlots = [];
       }
 
-      // Remove the timeslot (assuming slot is a string like "14:00")
       const updatedSlots = scheduleToUpdate.availableSlots.filter(
         (s) => s !== slot
       );
 
-      // Check if anything was actually removed
       if (updatedSlots.length === scheduleToUpdate.availableSlots.length) {
         const response = ReturnObject(false, 'Timeslot not found in schedule');
         return res.status(404).send(response);
@@ -190,16 +165,10 @@ export class ScheduleService {
         'Something went wrong while removing timeslot'
       );
       logger.error('Error in createSchedule', error);
-      return res.status(500).send(response); // 500 for unexpected server errors
+      return res.status(500).send(response);
     }
   };
 
-  /**
-   * Delete a schedule
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {ReturnType}
-   */
   deleteSchedule = async (req, res) => {
     try {
       const { scheduleId } = req.body;
@@ -229,12 +198,6 @@ export class ScheduleService {
     }
   };
 
-  /**
-   * Delete a schedule
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {ReturnType}
-   */
   getScheduleById = async (req, res) => {
     try {
       const { scheduleId } = req.params;
@@ -260,12 +223,6 @@ export class ScheduleService {
     }
   };
 
-  /**
-   * Delete all schedule
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {ReturnType}
-   */
   getAllSchedule = async (req, res) => {
     try {
       const allSchedule = await ScheduleModel.find();
@@ -280,12 +237,6 @@ export class ScheduleService {
     }
   };
 
-  /**
-   * Get a schedule by date
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @returns {Promise<void>}
-   */
   getByDate = async (req, res) => {
     try {
       const { date } = req.body;
@@ -314,14 +265,6 @@ export class ScheduleService {
     }
   };
 
-  /**
-   * Updates time slots after a schedule has been made
-   * @param {String} scheduleId
-   * @param {any} booking
-   * @param {Collection<Document>} scheduleCollection
-   * @param {import('mongoose').ClientSession} session
-   * @returns {Promise<any>}
-   */
   updateScheduleAfterBooking = async (
     scheduleId,
     booking,
@@ -359,7 +302,6 @@ export class ScheduleService {
         scheduleToUpdate.availableSlots
       );
 
-      // Perform the update using updateOne
       const updateResult = await scheduleCollection.updateOne(
         { _id: scheduleObjectId },
         {
@@ -373,7 +315,6 @@ export class ScheduleService {
         throw new Error('Failed to update schedule');
       }
 
-      // Fetch and return the updated schedule
       const updatedSchedule = await scheduleCollection.findOne(
         {
           _id: scheduleObjectId
@@ -390,12 +331,6 @@ export class ScheduleService {
     }
   };
 
-  /**
-   * Generates an array of Available slots in the format '10:00'
-   * @param {Number} startTime
-   * @param {Number} endTime
-   * @returns {String[]} availableSlots
-   */
   generateAvailableSlots = (startTime, endTime) => {
     try {
       const start = Number(startTime.split(':')[0]);
@@ -405,7 +340,6 @@ export class ScheduleService {
       let currentSlot = start;
 
       while (true) {
-        // Reset to 0 at midnight
         if (currentSlot === 24) currentSlot = 0;
         let postfix = currentSlot < 12 ? 'am' : 'pm';
         let hour = currentSlot.toString().padStart(2, '0');
@@ -425,17 +359,10 @@ export class ScheduleService {
     }
   };
 
-  /**
-   * Removes booked time slots from the available list
-   * @param {String} startTime - e.g., "10:00"
-   * @param {Number} duration - in hours (e.g., 2 for 2 hours)
-   * @param {String[]} availableSlots
-   * @returns {String[]} newAvailableSlots
-   */
   updateAvailableSlotsAfterBooking = (startTime, duration, availableSlots) => {
     try {
       const startHour = Number(startTime.split(':')[0]);
-      const slotsToRemove = Math.ceil(Number(duration)); // Round up 6.5 → 7
+      const slotsToRemove = Math.ceil(Number(duration));
 
       const blockedHours = new Set();
       for (let i = 0; i < slotsToRemove; i++) {

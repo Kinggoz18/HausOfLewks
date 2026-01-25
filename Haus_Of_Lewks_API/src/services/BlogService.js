@@ -3,11 +3,6 @@ import { ReturnObject } from '../util/returnObject.js';
 import logger from '../util/logger.js';
 
 export class BlogService {
-  /**
-   * Create a new blog post
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   createBlogPost = async (req, res) => {
     const { title, slug, excerpt, content, coverImageUrl, isPublished } =
       req.body;
@@ -54,11 +49,6 @@ export class BlogService {
     }
   };
 
-  /**
-   * Get all blog posts (optionally filtered by published status)
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   getAllBlogPosts = async (req, res) => {
     const { published } = req.query;
 
@@ -82,11 +72,6 @@ export class BlogService {
     }
   };
 
-  /**
-   * Get a blog post by ID
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   getBlogPostById = async (req, res) => {
     const { blogId } = req.params;
 
@@ -110,15 +95,9 @@ export class BlogService {
     }
   };
 
-  /**
-   * Get a blog post by slug
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   getBlogPostBySlug = async (req, res) => {
     const { slug } = req.params;
 
-    // Validate slug - reject file extensions and invalid patterns
     const invalidPatterns = /\.(js|map|css|json|ts|tsx|jsx|html|xml|txt|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/i;
     const validSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 
@@ -149,11 +128,6 @@ export class BlogService {
     }
   };
 
-  /**
-   * Update a blog post
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   updateBlogPost = async (req, res) => {
     const { blogId } = req.params;
     const { title, slug, excerpt, content, coverImageUrl, isPublished } =
@@ -174,7 +148,6 @@ export class BlogService {
       if (coverImageUrl !== undefined) blogPost.coverImageUrl = coverImageUrl;
       if (isPublished !== undefined) {
         blogPost.isPublished = isPublished;
-        // Set publishedAt if publishing for the first time
         if (isPublished && !blogPost.publishedAt) {
           blogPost.publishedAt = new Date();
         }
@@ -198,11 +171,6 @@ export class BlogService {
     }
   };
 
-  /**
-   * Delete a blog post
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   */
   deleteBlogPost = async (req, res) => {
     const { blogId } = req.params;
 
