@@ -21,7 +21,7 @@ const connectToDb = async () => {
       console.error({
         error: message,
         hint:
-          'SRV lookup failed (Atlas mongodb+srv). Verify the cluster still exists in Atlas, the hostname in the URI matches Atlas exactly, and try the standard connection string if DNS keeps failing.'
+          'SRV lookup failed (Atlas mongodb+srv). Redeploy with latest code (Render sets RENDER=true so public DNS is used for SRV), set MONGO_DNS_USE_PUBLIC=true, or paste Atlas’s standard (non-+srv) URI into MONGODB_URL.'
       });
     } else {
       console.error({ error: message });

@@ -1,5 +1,20 @@
+import dns from 'node:dns';
 import dotenv from 'dotenv';
+
 dotenv.config();
+
+// Some hosts' default resolver fails SRV lookups for mongodb+srv (querySrv ENOTFOUND).
+// Enabled on Render by default; elsewhere set MONGO_DNS_USE_PUBLIC=true. Opt out: MONGO_DNS_USE_PUBLIC=false.
+if (
+  process.env.MONGO_DNS_USE_PUBLIC !== 'false' &&
+  (process.env.RENDER === 'true' || process.env.MONGO_DNS_USE_PUBLIC === 'true')
+) {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch {
+    // ignore
+  }
+}
 
 const serverEnvVaiables = {
   // Render and other hosts often expose DATABASE_URL; Atlas docs use MONGODB_URL.

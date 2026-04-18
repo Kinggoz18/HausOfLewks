@@ -10,7 +10,8 @@ const EmailTransportSchema = new mongoose.Schema(
     sentAt: {
       type: Date,
       required: true,
-      default: Date.now
+      default: Date.now,
+      expires: 86400
     },
     emailType: {
       type: String,
@@ -19,9 +20,6 @@ const EmailTransportSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-// Auto-delete records after 24 hours to keep the collection lean
-EmailTransportSchema.index({ sentAt: 1 }, { expireAfterSeconds: 86400 });
 
 EmailTransportSchema.statics.getRecipientCountInLast24Hours = async function () {
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
