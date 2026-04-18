@@ -12,6 +12,7 @@ const init = async () => {
     });
   } catch (error) {
     console.error('Error in init:', error?.message ?? error);
+    process.exit(1);
   }
 };
 

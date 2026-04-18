@@ -10,8 +10,7 @@ const EmailTransportSchema = new mongoose.Schema(
     sentAt: {
       type: Date,
       required: true,
-      default: Date.now,
-      index: true
+      default: Date.now
     },
     emailType: {
       type: String,

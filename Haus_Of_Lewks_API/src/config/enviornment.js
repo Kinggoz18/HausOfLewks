@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const serverEnvVaiables = {
-  mongoDbUrl: process.env.MONGODB_URL ?? null,
+  // Render and other hosts often expose DATABASE_URL; Atlas docs use MONGODB_URL.
+  mongoDbUrl: process.env.MONGODB_URL ?? process.env.DATABASE_URL ?? null,
   basePath: process.env.BASE_PATH ?? null,
   databaseName: process.env.DATABASE_NAME ?? null,
   testDatabaseName: process.env.TEST_DATABASE_NAME ?? null,
